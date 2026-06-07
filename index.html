@@ -20,10 +20,8 @@
       --arabic: 'Amiri', serif;
       --ui:     'Nunito', sans-serif;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; -webkit-tap-highlight-color: transparent; }
-
     body {
       font-family: var(--ui);
       background-color: var(--bg);
@@ -33,7 +31,6 @@
       justify-content: center;
       -webkit-font-smoothing: antialiased;
     }
-
     #root {
       width: 100%;
       max-width: 420px;
@@ -46,151 +43,81 @@
 
     /* ── Header ──────────────────────────────────────────────── */
     .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       padding: 11px 16px 10px;
       background: rgba(250,247,242,.98);
       border-bottom: 1.5px solid rgba(201,150,58,.14);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(6px);
-      gap: 8px;
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(6px); gap: 8px;
     }
-    .logo {
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--navy);
-      letter-spacing: -.3px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-    .logo-img {
-      height: 38px;
-      width: 38px;
-      object-fit: cover;
-      border-radius: 9px;
-      border: 2px solid #000;
-    }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      flex-shrink: 0;
-    }
-    .streak-pill {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      background: var(--navy);
-      color: #fff;
-      padding: 5px 11px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
-    }
+    .logo { font-size: 17px; font-weight: 800; color: var(--navy); letter-spacing: -.3px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .logo-img { height: 38px; width: 38px; object-fit: cover; border-radius: 9px; border: 2px solid #000; }
+    .header-right { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+    .streak-pill { display: flex; align-items: center; gap: 4px; background: var(--navy); color: #fff; padding: 5px 11px; border-radius: 20px; font-size: 13px; font-weight: 700; }
 
-    /* ── User selector ───────────────────────────────────────── */
-    .user-pill {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(201,150,58,.13);
-      color: var(--navy);
-      padding: 5px 10px 5px 8px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      position: relative;
-      border: 1.5px solid rgba(201,150,58,.3);
-      white-space: nowrap;
-    }
-    .user-pill select {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      font-size: 16px; /* prevents iOS zoom */
-    }
+    /* ── User pill ───────────────────────────────────────────── */
+    .user-pill { display: flex; align-items: center; gap: 5px; background: rgba(201,150,58,.13); color: var(--navy); padding: 5px 10px 5px 8px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; position: relative; border: 1.5px solid rgba(201,150,58,.3); white-space: nowrap; }
+    .user-pill select { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; font-size: 16px; }
     .user-chevron { font-size: 9px; opacity: .6; }
 
-    /* ── Add-user modal ──────────────────────────────────────── */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(27,42,74,.45);
-      z-index: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    .modal {
-      background: var(--white);
-      border-radius: 18px;
-      padding: 28px 24px 22px;
-      width: 100%;
-      max-width: 340px;
-      box-shadow: var(--shadow);
-    }
+    /* ── Add user modal ──────────────────────────────────────── */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(27,42,74,.45); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .modal { background: var(--white); border-radius: 18px; padding: 28px 24px 22px; width: 100%; max-width: 340px; box-shadow: var(--shadow); }
     .modal h3 { font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 16px; }
-    .modal input {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 2px solid rgba(27,42,74,.15);
-      font-family: var(--ui);
-      font-size: 15px;
-      color: var(--navy);
-      outline: none;
-      margin-bottom: 14px;
-    }
+    .modal input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 2px solid rgba(27,42,74,.15); font-family: var(--ui); font-size: 15px; color: var(--navy); outline: none; margin-bottom: 14px; }
     .modal input:focus { border-color: var(--gold); }
     .modal-btns { display: flex; gap: 10px; }
     .modal-btns button { flex: 1; padding: 11px; border-radius: 10px; border: none; font-family: var(--ui); font-size: 14px; font-weight: 800; cursor: pointer; }
     .modal-btns .btn-confirm { background: var(--gold); color: #fff; }
     .modal-btns .btn-cancel  { background: rgba(27,42,74,.08); color: var(--navy); }
 
-    /* ── Top tab nav ─────────────────────────────────────────── */
-    .top-tabs {
-      display: flex;
-      background: var(--white);
-      border-bottom: 1.5px solid rgba(27,42,74,.09);
-      position: sticky;
-      top: 61px;
-      z-index: 90;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 11px 8px 9px;
-      border: none;
-      border-bottom: 2.5px solid transparent;
-      margin-bottom: -1.5px;
-      background: none;
-      cursor: pointer;
-      font-family: var(--ui);
-      font-size: 12px;
-      font-weight: 800;
-      color: rgba(27,42,74,.38);
-      text-transform: uppercase;
-      letter-spacing: .6px;
-      transition: color .13s, border-color .13s;
-    }
+    /* ── Top tabs ────────────────────────────────────────────── */
+    .top-tabs { display: flex; background: var(--white); border-bottom: 1.5px solid rgba(27,42,74,.09); position: sticky; top: 61px; z-index: 90; }
+    .tab-btn { flex: 1; padding: 11px 8px 9px; border: none; border-bottom: 2.5px solid transparent; margin-bottom: -1.5px; background: none; cursor: pointer; font-family: var(--ui); font-size: 12px; font-weight: 800; color: rgba(27,42,74,.38); text-transform: uppercase; letter-spacing: .6px; transition: color .13s, border-color .13s; }
     .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
 
+    /* ── Learning goal bar ───────────────────────────────────── */
+    .goal-wrap { padding: 14px 18px 10px; }
+    .goal-input-row { display: flex; gap: 8px; align-items: center; }
+    .goal-input {
+      flex: 1; padding: 10px 14px; border-radius: 24px;
+      border: 2px solid rgba(27,42,74,.13);
+      background: var(--white);
+      font-family: var(--ui); font-size: 14px; color: var(--navy);
+      outline: none; transition: border-color .18s;
+      box-shadow: 0 2px 8px rgba(27,42,74,.06);
+    }
+    .goal-input:focus { border-color: var(--gold); }
+    .goal-input::placeholder { color: rgba(27,42,74,.38); }
+    .goal-submit {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--gold); color: #fff; border: none;
+      font-size: 18px; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity .13s, transform .13s;
+      box-shadow: 0 2px 8px rgba(201,150,58,.35);
+    }
+    .goal-submit:hover { opacity: .88; }
+    .goal-submit:active { transform: scale(.92); }
+    .goal-submit:disabled { opacity: .3; cursor: default; }
+    .goal-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .chip {
+      padding: 5px 12px; border-radius: 20px; border: 1.5px solid rgba(27,42,74,.13);
+      background: var(--white); font-family: var(--ui); font-size: 12px; font-weight: 700;
+      color: rgba(27,42,74,.65); cursor: pointer;
+      transition: border-color .13s, background .13s, color .13s;
+    }
+    .chip:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,150,58,.05); }
+    .chip.active-goal { background: rgba(201,150,58,.12); border-color: var(--gold); color: var(--gold); }
+
     /* ── Progress ────────────────────────────────────────────── */
-    .progress-wrap { padding: 14px 20px 0; }
+    .progress-wrap { padding: 10px 20px 0; }
     .progress-track { height: 7px; background: rgba(27,42,74,.1); border-radius: 4px; overflow: hidden; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #E8B45A); border-radius: 4px; transition: width .45s cubic-bezier(.4,0,.2,1); }
     .progress-label { font-size: 11.5px; color: var(--navy); opacity: .55; text-align: center; margin-top: 5px; font-weight: 700; letter-spacing: .3px; }
 
     /* ── Main ────────────────────────────────────────────────── */
-    .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 18px 32px; min-height: 0; }
+    .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 18px 32px; min-height: 0; }
 
     /* ── Card ────────────────────────────────────────────────── */
     .card { width: 100%; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 26px 22px 22px; position: relative; will-change: transform; touch-action: pan-y; }
@@ -243,7 +170,7 @@
     .reveal-text { font-size: 14px; color: var(--navy); line-height: 1.55; }
     .reveal-answer { font-family: var(--arabic); font-size: 26px; direction: rtl; color: var(--navy); display: inline-block; margin: 4px 0 2px; }
 
-    /* ── Keyboard (inline below card) ────────────────────────── */
+    /* ── Keyboard ────────────────────────────────────────────── */
     .keyboard { width: 100%; background: rgba(22,34,60,.97); padding: 10px 6px 12px; border-radius: 14px; margin-top: 10px; }
     .kb-row { display: flex; justify-content: center; gap: 4px; margin-bottom: 5px; direction: rtl; }
     .key { background: rgba(255,255,255,.13); color: #fff; border: none; border-radius: 6px; padding: 9px 5px 8px; font-family: var(--arabic); font-size: 17px; cursor: pointer; flex: 1; max-width: 33px; text-align: center; transition: background .08s; line-height: 1; }
@@ -262,12 +189,14 @@
     .stat-val { font-size: 28px; font-weight: 800; color: var(--gold); }
     .stat-lbl { font-size: 11px; font-weight: 700; color: rgba(27,42,74,.45); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
     .arabic-blessing { font-family: var(--arabic); font-size: 18px; color: rgba(27,42,74,.45); direction: rtl; }
+    .btn-more { margin-top: 20px; padding: 13px 28px; background: rgba(27,42,74,.07); color: var(--navy); border: none; border-radius: 12px; font-family: var(--ui); font-size: 14px; font-weight: 700; cursor: pointer; }
+    .btn-more:hover { background: rgba(27,42,74,.12); }
 
     /* ── Journey ─────────────────────────────────────────────── */
-    .journey { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 22px 40px; text-align: center; }
-    .journey-icon  { font-size: 60px; margin-bottom: 18px; }
+    .journey { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px 22px 40px; text-align: center; }
+    .journey-icon  { font-size: 56px; margin-bottom: 16px; }
     .journey-title { font-size: 24px; font-weight: 800; color: var(--navy); margin-bottom: 10px; }
-    .journey-desc  { font-size: 14.5px; color: rgba(27,42,74,.52); line-height: 1.65; max-width: 290px; margin-bottom: 30px; }
+    .journey-desc  { font-size: 14px; color: rgba(27,42,74,.52); line-height: 1.65; max-width: 290px; margin-bottom: 24px; }
     .info-row { width: 100%; background: var(--white); border-radius: 13px; padding: 13px 18px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .info-key { font-size: 13px; font-weight: 700; color: rgba(27,42,74,.55); }
     .info-val { font-size: 18px; font-weight: 800; color: var(--navy); }
@@ -291,7 +220,18 @@
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
 
-/* ── Topic emoji map ──────────────────────────────────────────── */
+/* ── Constants ────────────────────────────────────────────────── */
+const DAILY_GOAL   = 5;
+const SUGGESTIONS  = [
+  'Months of the year', 'Numbers 1–20', 'Colors',
+  'Greetings', 'Family members', 'Question words',
+  'Verb conjugation', 'Days of the week', 'Definite article ال',
+];
+const KB = [
+  ['ض','ص','ث','ق','ف','غ','ع','ه','خ','ح','ج','د'],
+  ['ش','س','ي','ب','ل','ا','ت','ن','م','ك','ط'],
+  ['ئ','ء','ؤ','ر','لا','ى','ة','و','ز','ظ'],
+];
 const TOPIC_EMOJI = {
   greetings:'👋', numbers:'🔢', colors:'🎨', family:'👨‍👩‍👧',
   days:'📅', months:'🗓️', 'verb conjugation':'⚡', 'noun gender':'⚖️',
@@ -300,52 +240,50 @@ const TOPIC_EMOJI = {
 };
 const topicEmoji = t => TOPIC_EMOJI[(t||'').toLowerCase()] ?? '📖';
 
-/* ── Normalize card ───────────────────────────────────────────── */
+/* ── Normalize Claude card ────────────────────────────────────── */
 function normalizeCard(raw, id) {
-  const base = {
-    id, type: raw.type, topic: raw.topic ?? 'Arabic',
-    emoji: topicEmoji(raw.topic),
-    question_en: raw.question_en, question_ar: raw.question_ar,
-    explanation: raw.explanation_en,
-  };
+  const base = { id, type: raw.type, topic: raw.topic ?? 'Arabic', emoji: topicEmoji(raw.topic), question_en: raw.question_en, question_ar: raw.question_ar, explanation: raw.explanation_en };
   if (raw.type === 'swipe')           return { ...base, isTrue: raw.answer === 'true' };
-  if (raw.type === 'multiple_choice') {
-    const opts = raw.options ?? [];
-    return { ...base, options: opts, correctIndex: opts.findIndex(o => o === raw.answer) };
-  }
+  if (raw.type === 'multiple_choice') { const opts = raw.options ?? []; return { ...base, options: opts, correctIndex: opts.findIndex(o => o === raw.answer) }; }
   return { ...base, expectedAnswer: raw.answer };
 }
 
 /* ── Fallback cards ───────────────────────────────────────────── */
 const FALLBACK = [
   normalizeCard({ type:'swipe',           topic:'Vocabulary',  question_en:'كَلْب means "dog"',                question_ar:'كَلْب',    answer:'true',       explanation_en:'كَلْب (kalb) = dog. Plural: كِلاب.' }, 'f1'),
-  normalizeCard({ type:'multiple_choice', topic:'Greetings',   question_en:'How do you say "Good morning"?',                          answer:'صباح الخير', options:['مرحبا','صباح الخير','شكراً','مساء النور'], explanation_en:'صباح الخير = good morning. مرحبا = hello.' }, 'f2'),
+  normalizeCard({ type:'multiple_choice', topic:'Greetings',   question_en:'How do you say "Good morning"?',                          answer:'صباح الخير', options:['مرحبا','صباح الخير','شكراً','مساء النور'], explanation_en:'صباح الخير (ṣabāḥ al-khayr). مرحبا = hello.' }, 'f2'),
   normalizeCard({ type:'type_answer',     topic:'Numbers',     question_en:'Write the Arabic word for "three"',                       answer:'ثلاثة',      explanation_en:'ثلاثة (thalātha). واحد، اثنان، ثلاثة.' }, 'f3'),
   normalizeCard({ type:'swipe',           topic:'Grammar',     question_en:'Arabic nouns have masculine and feminine grammatical gender.', answer:'true',   explanation_en:'Yes — feminine nouns usually end in ـة (tā marbūṭa).' }, 'f4'),
   normalizeCard({ type:'multiple_choice', topic:'Colors',      question_en:'What does أَزْرَق (azraq) mean?', question_ar:'أَزْرَق', answer:'Blue',       options:['Red','Green','Blue','Yellow'], explanation_en:'أَزْرَق = blue. أَحْمَر = red, أَخْضَر = green.' }, 'f5'),
 ];
 
-/* ── Keyboard layout ──────────────────────────────────────────── */
-const KB = [
-  ['ض','ص','ث','ق','ف','غ','ع','ه','خ','ح','ج','د'],
-  ['ش','س','ي','ب','ل','ا','ت','ن','م','ك','ط'],
-  ['ئ','ء','ؤ','ر','لا','ى','ة','و','ز','ظ'],
-];
+/* ── localStorage helpers ─────────────────────────────────────── */
+const todayStr = () => new Date().toISOString().split('T')[0];
+const goalSlug = g => (g||'').toLowerCase().replace(/\s+/g,'_').slice(0,30);
 
-/* ── Weak-spot cache ──────────────────────────────────────────── */
-const WS_KEY = u => `arabiya_weak_spots_${u}`;
-const getWS  = u    => { try { return JSON.parse(localStorage.getItem(WS_KEY(u))||'[]'); } catch { return []; } };
-const setWS  = (u,a) => localStorage.setItem(WS_KEY(u), JSON.stringify(a.slice(0,8)));
-const addWS  = (u,t) => { const c=getWS(u); if(!c.includes(t)) setWS(u,[t,...c]); };
-const dropWS = (u,t) => setWS(u, getWS(u).filter(x => x!==t));
+// Cards cache — so refresh is free
+const CARDS_KEY   = (u,g) => `arabiya_cards_${u}_${todayStr()}_${goalSlug(g)}`;
+const loadCards   = (u,g) => { try { return JSON.parse(localStorage.getItem(CARDS_KEY(u,g))||'null')?.cards ?? null; } catch { return null; } };
+const saveCards   = (u,g,cards) => localStorage.setItem(CARDS_KEY(u,g), JSON.stringify({ cards }));
 
-/* ── Session persistence ──────────────────────────────────────── */
-const todayStr   = () => new Date().toISOString().split('T')[0];
-const SESSION_KEY = u => `arabiya_session_${u}_${todayStr()}`;
-const loadSession = u => { try { return JSON.parse(localStorage.getItem(SESSION_KEY(u))||'null'); } catch { return null; } };
-const saveSession = (u, data) => localStorage.setItem(SESSION_KEY(u), JSON.stringify(data));
+// Session state — resume progress on refresh
+const SESSION_KEY  = (u,g) => `arabiya_session_${u}_${todayStr()}_${goalSlug(g)}`;
+const loadSession  = (u,g) => { try { return JSON.parse(localStorage.getItem(SESSION_KEY(u,g))||'null'); } catch { return null; } };
+const saveSession  = (u,g,d) => localStorage.setItem(SESSION_KEY(u,g), JSON.stringify(d));
 
-/* ── User storage ─────────────────────────────────────────────── */
+// Active goal — remember what the user was working on
+const GOAL_KEY    = u => `arabiya_goal_${u}_${todayStr()}`;
+const loadGoal    = u => localStorage.getItem(GOAL_KEY(u)) || '';
+const saveGoal    = (u,g) => localStorage.setItem(GOAL_KEY(u), g);
+
+// Weak spots
+const WS_KEY  = u   => `arabiya_weak_spots_${u}`;
+const getWS   = u   => { try { return JSON.parse(localStorage.getItem(WS_KEY(u))||'[]'); } catch { return []; } };
+const setWS   = (u,a) => localStorage.setItem(WS_KEY(u), JSON.stringify(a.slice(0,8)));
+const addWS   = (u,t) => { const c=getWS(u); if(!c.includes(t)) setWS(u,[t,...c]); };
+const dropWS  = (u,t) => setWS(u, getWS(u).filter(x=>x!==t));
+
+// Users
 const USERS_KEY   = 'arabiya_users';
 const CUR_KEY     = 'arabiya_current_user';
 const loadUsers   = () => { try { return JSON.parse(localStorage.getItem(USERS_KEY)||'["Ali"]'); } catch { return ['Ali']; } };
@@ -360,23 +298,19 @@ async function apiStreak(user) {
     if (!r.ok) return null;
     const d = await r.json();
     if (Array.isArray(d.weak_spots)) setWS(user, d.weak_spots);
-    if (Array.isArray(d.users)) {
-      const merged = [...new Set([...loadUsers(), ...d.users])];
-      saveUsers(merged);
-    }
+    if (Array.isArray(d.users)) { const m=[...new Set([...loadUsers(),...d.users])]; saveUsers(m); }
     return d;
   } catch { return null; }
 }
 
-async function apiCard(user, weakSpots=[]) {
+async function apiSession(user, learning_goal, weak_spots=[]) {
   try {
-    const r = await fetch('/api/card', {
+    const r = await fetch('/api/session', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ user, weak_spots: weakSpots }),
+      body: JSON.stringify({ user, learning_goal, weak_spots }),
     });
     if (!r.ok) return null;
-    const d = await r.json();
-    return d.stubbed ? null : d;
+    return r.json();
   } catch { return null; }
 }
 
@@ -404,12 +338,7 @@ async function apiRecord(user, card_type, topic, question, was_correct) {
 }
 
 async function apiAddUser(username) {
-  try {
-    await fetch('/api/users', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ username }),
-    });
-  } catch {}
+  try { await fetch('/api/users', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username }) }); } catch {}
 }
 
 const isTouch = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -423,43 +352,32 @@ function UserDropdown({ user, users, onSwitch, onAdd }) {
   const inputRef = useRef(null);
 
   const handleChange = e => {
-    if (e.target.value === '__add__') { setShowModal(true); }
+    if (e.target.value === '__add__') setShowModal(true);
     else onSwitch(e.target.value);
   };
-
   const confirmAdd = () => {
     const name = newName.trim();
     if (!name) return;
-    onAdd(name);
-    setNewName('');
-    setShowModal(false);
+    onAdd(name); setNewName(''); setShowModal(false);
   };
-
   useEffect(() => { if (showModal) setTimeout(() => inputRef.current?.focus(), 50); }, [showModal]);
 
   return (
     <>
       <div className="user-pill">
-        <span>👤</span>
-        <span>{user}</span>
-        <span className="user-chevron">▾</span>
+        <span>👤</span><span>{user}</span><span className="user-chevron">▾</span>
         <select value={user} onChange={handleChange}>
           {users.map(u => <option key={u} value={u}>{u}</option>)}
-          <option value="__add__">+ Add user</option>
+          <option value="__add__">+ Add learner</option>
         </select>
       </div>
-
       {showModal && (
         <div className="modal-backdrop" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h3>Add a learner</h3>
-            <input
-              ref={inputRef}
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
+            <input ref={inputRef} value={newName} onChange={e => setNewName(e.target.value)}
               placeholder="Name (e.g. Sara)"
-              onKeyDown={e => e.key==='Enter' && confirmAdd()}
-            />
+              onKeyDown={e => e.key==='Enter' && confirmAdd()} />
             <div className="modal-btns">
               <button className="btn-cancel"  onClick={() => setShowModal(false)}>Cancel</button>
               <button className="btn-confirm" onClick={confirmAdd} disabled={!newName.trim()}>Add</button>
@@ -472,6 +390,61 @@ function UserDropdown({ user, users, onSwitch, onAdd }) {
 }
 
 /* ════════════════════════════════════════════════════════════════
+   LearningGoalBar
+════════════════════════════════════════════════════════════════ */
+function LearningGoalBar({ currentGoal, onSubmit, disabled }) {
+  const [value, setValue]     = useState('');
+  const [focused, setFocused] = useState(false);
+
+  const submit = (g) => {
+    const goal = (g ?? value).trim();
+    if (goal) { onSubmit(goal); setValue(''); setFocused(false); }
+  };
+
+  return (
+    <div className="goal-wrap">
+      <div className="goal-input-row">
+        <input
+          className="goal-input"
+          value={value}
+          onChange={e => setValue(e.target.value)}
+          placeholder="What do you want to learn today?"
+          onFocus={() => setFocused(true)}
+          onBlur={() => setTimeout(() => setFocused(false), 160)}
+          onKeyDown={e => e.key === 'Enter' && submit()}
+          disabled={disabled}
+        />
+        <button className="goal-submit" onClick={() => submit()} disabled={!value.trim() || disabled}>→</button>
+      </div>
+
+      {/* Suggestion chips — show on focus or when no goal yet */}
+      {(focused || !currentGoal) && (
+        <div className="goal-chips fade-in">
+          {SUGGESTIONS.map(s => (
+            <button key={s}
+              className={`chip${currentGoal === s ? ' active-goal' : ''}`}
+              onMouseDown={e => { e.preventDefault(); submit(s); }}>
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Show active goal when chips are hidden */}
+      {currentGoal && !focused && (
+        <p style={{ fontSize:12, color:'rgba(27,42,74,.45)', marginTop:7, fontWeight:600 }}>
+          Focused on: <span style={{ color:'var(--gold)' }}>{currentGoal}</span>
+          <button onClick={() => onSubmit('')}
+            style={{ marginLeft:8, background:'none', border:'none', color:'rgba(27,42,74,.35)', cursor:'pointer', fontSize:11, fontWeight:700 }}>
+            clear ✕
+          </button>
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
    ArabicKeyboard
 ════════════════════════════════════════════════════════════════ */
 function ArabicKeyboard({ onKey, onDone }) {
@@ -480,20 +453,14 @@ function ArabicKeyboard({ onKey, onDone }) {
       {KB.map((row, ri) => (
         <div key={ri} className="kb-row">
           {row.map(ch => (
-            <button key={ch} className="key"
-              onMouseDown={e => { e.preventDefault(); onKey(ch); }}>{ch}</button>
+            <button key={ch} className="key" onMouseDown={e => { e.preventDefault(); onKey(ch); }}>{ch}</button>
           ))}
-          {ri === 2 && (
-            <button className="key wide"
-              onMouseDown={e => { e.preventDefault(); onKey('⌫'); }}>⌫</button>
-          )}
+          {ri === 2 && <button className="key wide" onMouseDown={e => { e.preventDefault(); onKey('⌫'); }}>⌫</button>}
         </div>
       ))}
       <div className="kb-row" style={{ marginBottom:0 }}>
-        <button className="key space"
-          onMouseDown={e => { e.preventDefault(); onKey(' '); }}>مسافة</button>
-        <button className="key wide" style={{ maxWidth:58, fontSize:10, fontFamily:'Nunito' }}
-          onMouseDown={e => { e.preventDefault(); onDone(); }}>Done</button>
+        <button className="key space" onMouseDown={e => { e.preventDefault(); onKey(' '); }}>مسافة</button>
+        <button className="key wide" style={{ maxWidth:58, fontSize:10, fontFamily:'Nunito' }} onMouseDown={e => { e.preventDefault(); onDone(); }}>Done</button>
       </div>
     </div>
   );
@@ -502,7 +469,7 @@ function ArabicKeyboard({ onKey, onDone }) {
 /* ════════════════════════════════════════════════════════════════
    CardSkeleton
 ════════════════════════════════════════════════════════════════ */
-function CardSkeleton() {
+function CardSkeleton({ message = 'Generating your cards…' }) {
   return (
     <div className="slide-up" style={{ width:'100%' }}>
       <div className="card shimmer" style={{ cursor:'default' }}>
@@ -511,7 +478,7 @@ function CardSkeleton() {
           <div style={{ width:'72%', height:28, background:'rgba(27,42,74,.07)', borderRadius:8 }} />
           <div style={{ width:'50%', height:20, background:'rgba(27,42,74,.05)', borderRadius:6 }} />
         </div>
-        <p style={{ textAlign:'center', fontSize:13, color:'rgba(27,42,74,.35)', fontWeight:600 }}>Generating card…</p>
+        <p style={{ textAlign:'center', fontSize:13, color:'rgba(27,42,74,.35)', fontWeight:600 }}>{message}</p>
       </div>
     </div>
   );
@@ -556,9 +523,7 @@ function SwipeCard({ card, onAnswer }) {
   const ind  = dragX > 32 ? 'yes' : dragX < -32 ? 'no' : null;
   const flyX = flyDir === 'right' ? 520 : flyDir === 'left' ? -520 : null;
   const style = {
-    transform: flyX != null
-      ? `translateX(${flyX}px) rotate(${flyX > 0 ? 20 : -20}deg)`
-      : `translateX(${dragX}px) rotate(${dragX / 22}deg)`,
+    transform: flyX != null ? `translateX(${flyX}px) rotate(${flyX > 0 ? 20 : -20}deg)` : `translateX(${dragX}px) rotate(${dragX / 22}deg)`,
     transition: dragging ? 'none' : 'transform .32s ease',
     cursor: dragging ? 'grabbing' : 'grab',
   };
@@ -586,8 +551,7 @@ function SwipeCard({ card, onAnswer }) {
 
   return (
     <div style={{ width:'100%' }}>
-      <div className="card" style={style}
-        onMouseDown={onMD} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={end}>
+      <div className="card" style={style} onMouseDown={onMD} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={end}>
         <div className="card-chip">{card.emoji} {card.topic} · True / False</div>
         <QBody />
         {ind === 'yes' && <div className="swipe-ov yes">✓</div>}
@@ -607,9 +571,9 @@ function SwipeCard({ card, onAnswer }) {
 ════════════════════════════════════════════════════════════════ */
 function MCCard({ card, onAnswer }) {
   const [sel, setSel] = useState(null);
-  const done    = sel !== null;
+  const done = sel !== null;
   const correct = sel === card.correctIndex;
-  const isAr    = s => /[؀-ۿ]/.test(s);
+  const isAr = s => /[؀-ۿ]/.test(s);
 
   return (
     <div className="slide-up" style={{ width:'100%' }}>
@@ -622,14 +586,8 @@ function MCCard({ card, onAnswer }) {
         <div className="mc-list">
           {(card.options??[]).map((opt, i) => {
             let cls = `mc-opt${isAr(opt) ? '' : ' en'}`;
-            if (done) {
-              if (i === card.correctIndex) cls += ' correct';
-              else if (i === sel)          cls += ' wrong';
-            }
-            return (
-              <button key={i} className={cls} disabled={done}
-                onClick={() => !done && setSel(i)}>{opt}</button>
-            );
+            if (done) { if (i === card.correctIndex) cls += ' correct'; else if (i === sel) cls += ' wrong'; }
+            return <button key={i} className={cls} disabled={done} onClick={() => !done && setSel(i)}>{opt}</button>;
           })}
         </div>
         {done && (
@@ -661,18 +619,15 @@ function TypeCard({ card, onAnswer }) {
 
   const submit = async () => {
     if (!value.trim() || done || evaling) return;
-    setEvaling(true);
-    setShowKb(false);
+    setEvaling(true); setShowKb(false);
     const res = await apiEvaluate(card.question_en, card.expectedAnswer, value.trim());
     if (res) { setCorrect(res.correct); setFeedback(res.feedback); }
     else {
-      const norm = s => s.trim().replace(/[ً-ٟ]/g, '');
+      const norm = s => s.trim().replace(/[ً-ٟ]/g,'');
       const ok   = norm(value) === norm(card.expectedAnswer);
-      setCorrect(ok);
-      setFeedback(ok ? 'Correct!' : `Expected: ${card.expectedAnswer}`);
+      setCorrect(ok); setFeedback(ok ? 'Correct!' : `Expected: ${card.expectedAnswer}`);
     }
-    setEvaling(false);
-    setDone(true);
+    setEvaling(false); setDone(true);
   };
 
   const handleKey = ch => {
@@ -690,33 +645,23 @@ function TypeCard({ card, onAnswer }) {
           {card.question_ar && <span className="arabic" style={{ textAlign:'center' }}>{card.question_ar}</span>}
           <p className="english">{card.question_en}</p>
         </div>
-        <input ref={inputRef} className="type-input" type="text"
-          value={value} placeholder="اكتب هنا…"
-          disabled={done || evaling}
-          onChange={e => setValue(e.target.value)}
+        <input ref={inputRef} className="type-input" type="text" value={value} placeholder="اكتب هنا…"
+          disabled={done || evaling} onChange={e => setValue(e.target.value)}
           onFocus={() => !touch && setShowKb(true)}
           onKeyDown={e => e.key==='Enter' && submit()} />
-        {!done && (
-          <button className="btn-submit" disabled={!value.trim() || evaling} onClick={submit}>
-            {evaling ? 'Evaluating…' : 'Submit'}
-          </button>
-        )}
+        {!done && <button className="btn-submit" disabled={!value.trim() || evaling} onClick={submit}>{evaling ? 'Evaluating…' : 'Submit'}</button>}
         {done && (
           <>
             <div className={`reveal fade-in ${correct ? 'correct' : 'wrong'}`}>
               <span className="reveal-icon">{correct ? '✅' : '❌'}</span>
               <p className="reveal-text">{feedback}</p>
-              {!correct && <p className="reveal-text" style={{ marginTop:6 }}>
-                Answer: <span className="reveal-answer">{card.expectedAnswer}</span>
-              </p>}
+              {!correct && <p className="reveal-text" style={{ marginTop:6 }}>Answer: <span className="reveal-answer">{card.expectedAnswer}</span></p>}
             </div>
             <button className="btn-next fade-in" onClick={() => onAnswer(correct)}>Next →</button>
           </>
         )}
       </div>
-      {showKb && !done && !evaling && (
-        <ArabicKeyboard onKey={handleKey} onDone={() => setShowKb(false)} />
-      )}
+      {showKb && !done && !evaling && <ArabicKeyboard onKey={handleKey} onDone={() => setShowKb(false)} />}
     </div>
   );
 }
@@ -724,91 +669,118 @@ function TypeCard({ card, onAnswer }) {
 /* ════════════════════════════════════════════════════════════════
    CompletionScreen
 ════════════════════════════════════════════════════════════════ */
-function CompletionScreen({ streak, correctCount, total }) {
+function CompletionScreen({ streak, correctCount, total, onPracticeMore }) {
   return (
     <div className="completion slide-up">
       <span className="completion-moon">🌙</span>
       <h2 className="completion-title">Practice Complete!</h2>
       <p className="completion-sub">See you tomorrow. You're doing great.</p>
       <div className="stat-grid">
-        <div className="stat-box">
-          <div className="stat-val">🔥{streak.current_streak??0}</div>
-          <div className="stat-lbl">Day Streak</div>
-        </div>
-        <div className="stat-box">
-          <div className="stat-val">{correctCount}/{total}</div>
-          <div className="stat-lbl">Correct</div>
-        </div>
-        <div className="stat-box">
-          <div className="stat-val">{streak.total_cards_ever??0}</div>
-          <div className="stat-lbl">All Time</div>
-        </div>
+        <div className="stat-box"><div className="stat-val">🔥{streak.current_streak??0}</div><div className="stat-lbl">Day Streak</div></div>
+        <div className="stat-box"><div className="stat-val">{correctCount}/{total}</div><div className="stat-lbl">Correct</div></div>
+        <div className="stat-box"><div className="stat-val">{streak.total_cards_ever??0}</div><div className="stat-lbl">All Time</div></div>
       </div>
       <span className="arabic-blessing">بارك الله فيك</span>
+      <button className="btn-more" onClick={onPracticeMore}>Practice a new topic →</button>
     </div>
   );
 }
 
 /* ════════════════════════════════════════════════════════════════
-   HomePage  — session-aware, per-user, novel cards
+   HomePage
+   • Calls /api/session ONCE to get all 5 cards
+   • Caches cards in localStorage (refresh = free, no API call)
+   • Saves progress so refresh resumes mid-session
+   • Learning goal bar triggers a new themed session
 ════════════════════════════════════════════════════════════════ */
-const DAILY_GOAL = 5;
-
 function HomePage({ user, streak, onStreakUpdate }) {
+  const [goal, setGoal]         = useState(() => loadGoal(user));
+  const [cards, setCards]       = useState(null);
   const [cardIdx, setCardIdx]   = useState(0);
-  const [card, setCard]         = useState(null);
-  const [loading, setLoading]   = useState(true);
+  const [loading, setLoading]   = useState(false);
   const [correctCt, setCorrect] = useState(0);
   const [done, setDone]         = useState(false);
 
-  const fetchCard = useCallback(async (idx) => {
+  // Start or resume a session
+  const startSession = useCallback(async (g, forceNew = false) => {
     setLoading(true);
-    setCard(null);
-    const raw = await apiCard(user, getWS(user));
-    setCard(raw ? normalizeCard(raw, `${user}-${idx}-${Date.now()}`) : FALLBACK[idx % FALLBACK.length]);
+    setCards(null);
+
+    if (!forceNew) {
+      // Check for cached session (resume on refresh)
+      const session = loadSession(user, g);
+      const cached  = loadCards(user, g);
+      if (cached && session) {
+        const normalized = cached.map((c,i) => normalizeCard(c, `${user}-${i}`));
+        if (session.done) {
+          setCards(normalized); setCardIdx(DAILY_GOAL);
+          setCorrect(session.correctCount ?? 0); setDone(true);
+          setLoading(false); return;
+        }
+        setCards(normalized); setCardIdx(session.cardIdx ?? 0);
+        setCorrect(session.correctCount ?? 0); setDone(false);
+        setLoading(false); return;
+      }
+    }
+
+    // Fresh session — one Claude call for all 5 cards
+    setCardIdx(0); setCorrect(0); setDone(false);
+    const res = await apiSession(user, g, getWS(user));
+    const rawCards = res?.cards;
+    if (rawCards?.length) {
+      saveCards(user, g, rawCards);
+      setCards(rawCards.map((c,i) => normalizeCard(c, `${user}-${i}-${Date.now()}`)));
+    } else {
+      setCards(FALLBACK);
+    }
+    saveSession(user, g, { cardIdx: 0, correctCount: 0, done: false });
     setLoading(false);
   }, [user]);
 
-  // Restore session on mount (or when user switches)
+  // On mount or user change — restore last session
   useEffect(() => {
-    const saved = loadSession(user);
-    if (saved?.done) {
-      setDone(true);
-      setCorrect(saved.correctCount ?? 0);
-      setCardIdx(DAILY_GOAL);
-      setLoading(false);
-    } else if (saved?.cardIdx > 0) {
-      setCardIdx(saved.cardIdx);
-      setCorrect(saved.correctCount ?? 0);
-      fetchCard(saved.cardIdx);
-    } else {
-      fetchCard(0);
-    }
+    const savedGoal = loadGoal(user);
+    setGoal(savedGoal);
+    startSession(savedGoal, false);
   }, [user]);
+
+  const handleGoalSubmit = (newGoal) => {
+    const g = newGoal || '';
+    setGoal(g);
+    saveGoal(user, g);
+    startSession(g, true); // force new cards for new goal
+  };
 
   const handleAnswer = async (wasCorrect) => {
     const newCorrect = correctCt + (wasCorrect ? 1 : 0);
     setCorrect(newCorrect);
+    if (wasCorrect) dropWS(user, cards[cardIdx]?.topic);
+    else            addWS(user, cards[cardIdx]?.topic);
 
-    if (wasCorrect) dropWS(user, card?.topic);
-    else            addWS(user, card?.topic);
-
-    const res = await apiRecord(user, card.type, card.topic, card.question_en||'', wasCorrect);
+    const res = await apiRecord(user, cards[cardIdx].type, cards[cardIdx].topic, cards[cardIdx].question_en||'', wasCorrect);
     if (res?.streak) onStreakUpdate(res.streak);
 
     const next   = cardIdx + 1;
     const isDone = next >= DAILY_GOAL;
-
-    saveSession(user, { cardIdx: next, correctCount: newCorrect, done: isDone });
+    saveSession(user, goal, { cardIdx: next, correctCount: newCorrect, done: isDone });
 
     if (isDone) { setDone(true); setCardIdx(next); }
-    else        { setCardIdx(next); fetchCard(next); }
+    else setCardIdx(next);
   };
 
-  if (done) return <CompletionScreen streak={streak} correctCount={correctCt} total={DAILY_GOAL} />;
+  const card = cards?.[cardIdx] ?? null;
+
+  if (done) return (
+    <>
+      <LearningGoalBar currentGoal={goal} onSubmit={handleGoalSubmit} disabled={loading} />
+      <CompletionScreen streak={streak} correctCount={correctCt} total={DAILY_GOAL}
+        onPracticeMore={() => { const g = ''; setGoal(g); saveGoal(user, g); startSession(g, true); }} />
+    </>
+  );
 
   return (
     <>
+      <LearningGoalBar currentGoal={goal} onSubmit={handleGoalSubmit} disabled={loading} />
       <div className="progress-wrap">
         <div className="progress-track">
           <div className="progress-fill" style={{ width:`${(cardIdx/DAILY_GOAL)*100}%` }} />
@@ -816,7 +788,7 @@ function HomePage({ user, streak, onStreakUpdate }) {
         <p className="progress-label">{cardIdx} / {DAILY_GOAL} cards today</p>
       </div>
       <div className="main">
-        {loading && <CardSkeleton />}
+        {loading && <CardSkeleton message={goal ? `Building cards on "${goal}"…` : 'Generating your cards…'} />}
         {!loading && card?.type === 'swipe'           && <SwipeCard key={card.id} card={card} onAnswer={handleAnswer} />}
         {!loading && card?.type === 'multiple_choice' && <MCCard    key={card.id} card={card} onAnswer={handleAnswer} />}
         {!loading && card?.type === 'type_answer'     && <TypeCard  key={card.id} card={card} onAnswer={handleAnswer} />}
@@ -836,25 +808,14 @@ function JourneyPage({ user, streak }) {
       <h2 className="journey-title">{user}'s Journey</h2>
       <p className="journey-desc">Progress tracking, learning path, and achievements coming soon.</p>
       <div style={{ width:'100%' }}>
-        <div className="info-row">
-          <span className="info-key">🔥 Current Streak</span>
-          <span className="info-val">{streak.current_streak??0} days</span>
-        </div>
-        <div className="info-row">
-          <span className="info-key">📚 Cards Today</span>
-          <span className="info-val">{streak.cards_today??0} / {streak.daily_goal??5}</span>
-        </div>
-        <div className="info-row">
-          <span className="info-key">🏆 Total Cards</span>
-          <span className="info-val">{streak.total_cards_ever??0}</span>
-        </div>
+        <div className="info-row"><span className="info-key">🔥 Current Streak</span><span className="info-val">{streak.current_streak??0} days</span></div>
+        <div className="info-row"><span className="info-key">📚 Cards Today</span><span className="info-val">{streak.cards_today??0} / {streak.daily_goal??5}</span></div>
+        <div className="info-row"><span className="info-key">🏆 Total Cards</span><span className="info-val">{streak.total_cards_ever??0}</span></div>
         {spots.length > 0 && (
           <div className="info-row" style={{ flexDirection:'column', alignItems:'flex-start', gap:8 }}>
             <span className="info-key">🎯 Needs Practice</span>
             <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginTop:2 }}>
-              {spots.map(t => (
-                <span key={t} style={{ background:'rgba(196,96,58,.1)', color:'var(--red)', borderRadius:20, padding:'3px 10px', fontSize:12, fontWeight:700 }}>{t}</span>
-              ))}
+              {spots.map(t => <span key={t} style={{ background:'rgba(196,96,58,.1)', color:'var(--red)', borderRadius:20, padding:'3px 10px', fontSize:12, fontWeight:700 }}>{t}</span>)}
             </div>
           </div>
         )}
@@ -872,14 +833,11 @@ function App() {
   const [users,  setUsers]  = useState(loadUsers);
   const [streak, setStreak] = useState({ current_streak:0, cards_today:0, daily_goal:5, total_cards_ever:0 });
 
-  // Fetch streak whenever user changes
   useEffect(() => {
     apiStreak(user).then(s => {
       if (!s) return;
       setStreak(s);
-      if (Array.isArray(s.users)) {
-        setUsers(prev => [...new Set([...prev, ...s.users])]);
-      }
+      if (Array.isArray(s.users)) setUsers(prev => [...new Set([...prev,...s.users])]);
     });
   }, [user]);
 
@@ -889,22 +847,12 @@ function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
-  const navigate = hash => {
-    window.location.hash = hash.replace(/^#/,'');
-    setRoute(hash);
-  };
-
-  const switchUser = name => {
-    saveCurUser(name);
-    setUser(name);
-  };
-
-  const addUser = name => {
+  const navigate   = hash => { window.location.hash = hash.replace(/^#/,''); setRoute(hash); };
+  const switchUser = name => { saveCurUser(name); setUser(name); };
+  const addUser    = name => {
     const updated = [...new Set([...users, name])];
-    saveUsers(updated);
-    setUsers(updated);
-    apiAddUser(name);
-    switchUser(name);
+    saveUsers(updated); setUsers(updated);
+    apiAddUser(name); switchUser(name);
   };
 
   return (
@@ -921,7 +869,7 @@ function App() {
       </div>
 
       <div className="top-tabs">
-        <button className={`tab-btn ${route==='#/' ? 'active':''}`} onClick={() => navigate('#/')}>Cards</button>
+        <button className={`tab-btn ${route==='#/' ? 'active':''}`}        onClick={() => navigate('#/')}>Cards</button>
         <button className={`tab-btn ${route==='#/journey' ? 'active':''}`} onClick={() => navigate('#/journey')}>Journey</button>
       </div>
 
