@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Arabiya — Learn Arabic</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:     #FAF7F2;
+      --navy:   #1B2A4A;
+      --gold:   #C9963A;
+      --green:  #6B8F71;
+      --red:    #C4603A;
+      --white:  #FFFFFF;
+      --shadow: 0 6px 28px rgba(27,42,74,.13), 0 1px 6px rgba(27,42,74,.07);
+      --radius: 18px;
+      --arabic: 'Amiri', serif;
+      --ui:     'Nunito', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: var(--ui);
+      background-color: var(--bg);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 1 L59 30 L30 59 L1 30 Z' fill='none' stroke='%23C9963A' stroke-width='.7' opacity='.18'/%3E%3Cpath d='M30 13 L47 30 L30 47 L13 30 Z' fill='none' stroke='%23C9963A' stroke-width='.5' opacity='.13'/%3E%3Ccircle cx='30' cy='30' r='4.5' fill='none' stroke='%23C9963A' stroke-width='.45' opacity='.12'/%3E%3Ccircle cx='0' cy='0' r='2' fill='%23C9963A' opacity='.1'/%3E%3Ccircle cx='60' cy='0' r='2' fill='%23C9963A' opacity='.1'/%3E%3Ccircle cx='0' cy='60' r='2' fill='%23C9963A' opacity='.1'/%3E%3Ccircle cx='60' cy='60' r='2' fill='%23C9963A' opacity='.1'/%3E%3C/svg%3E");
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #root {
+      width: 100%;
+      max-width: 420px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: rgba(250,247,242,.97);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px 12px;
+      background: rgba(250,247,242,.98);
+      border-bottom: 1.5px solid rgba(201,150,58,.14);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(6px);
+    }
+    .logo { font-size: 20px; font-weight: 800; color: var(--navy); letter-spacing: -.3px; display: flex; align-items: center; gap: 6px; }
+    .logo-ar { font-family: var(--arabic); font-size: 22px; color: var(--gold); }
+    .streak-pill { display: flex; align-items: center; gap: 4px; background: var(--navy); color: #fff; padding: 5px 13px; border-radius: 20px; font-size: 14px; font-weight: 700; }
+
+    /* Progress */
+    .progress-wrap { padding: 14px 20px 0; }
+    .progress-track { height: 7px; background: rgba(27,42,74,.1); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #E8B45A); border-radius: 4px; transition: width .45s cubic-bezier(.4,0,.2,1); }
+    .progress-label { font-size: 11.5px; color: var(--navy); opacity: .55; text-align: center; margin-top: 5px; font-weight: 700; letter-spacing: .3px; }
+
+    /* Main area */
+    .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 18px 88px; min-height: 0; }
+
+    /* Card shell */
+    .card { width: 100%; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 26px 22px 22px; position: relative; will-change: transform; touch-action: pan-y; }
+    .card-chip { display: inline-flex; align-items: center; gap: 5px; background: rgba(27,42,74,.06); color: var(--navy); padding: 4px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 800; margin-bottom: 20px; letter-spacing: .3px; text-transform: uppercase; }
+
+    /* Text */
+    .arabic { font-family: var(--arabic); font-size: 34px; line-height: 1.65; direction: rtl; text-align: right; color: var(--navy); display: block; width: 100%; }
+    .english { font-size: 17px; font-weight: 600; color: var(--navy); line-height: 1.45; text-align: center; }
+    .q-area { text-align: center; margin-bottom: 20px; min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; }
+
+    /* Swipe */
+    .swipe-ov { position: absolute; inset: 0; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 52px; font-weight: 900; pointer-events: none; border: 3px solid transparent; }
+    .swipe-ov.yes { background: rgba(107,143,113,.1); border-color: var(--green); color: var(--green); }
+    .swipe-ov.no  { background: rgba(196,96,58,.1);   border-color: var(--red);   color: var(--red);   }
+    .swipe-btns { display: flex; gap: 20px; justify-content: center; margin-top: 20px; }
+    .swipe-btn { width: 62px; height: 62px; border-radius: 50%; border: 2.5px solid; background: var(--white); font-size: 26px; cursor: pointer; box-shadow: 0 3px 14px rgba(0,0,0,.13); transition: transform .12s, box-shadow .12s; display: flex; align-items: center; justify-content: center; }
+    .swipe-btn:active { transform: scale(.9); box-shadow: none; }
+    .swipe-btn.yes { border-color: var(--green); color: var(--green); }
+    .swipe-btn.no  { border-color: var(--red);   color: var(--red);   }
+    .swipe-hint { text-align: center; font-size: 12px; color: rgba(27,42,74,.38); margin-top: 10px; font-weight: 600; }
+
+    /* MC */
+    .mc-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+    .mc-opt { padding: 13px 17px; border-radius: 12px; border: 2px solid rgba(27,42,74,.12); background: var(--white); cursor: pointer; font-family: var(--arabic); font-size: 22px; direction: rtl; text-align: right; color: var(--navy); transition: border-color .13s, background .13s, color .13s; line-height: 1.4; }
+    .mc-opt.en { font-family: var(--ui); font-size: 15px; direction: ltr; text-align: left; }
+    .mc-opt:not(:disabled):hover { border-color: var(--gold); background: rgba(201,150,58,.05); }
+    .mc-opt:disabled { cursor: default; }
+    .mc-opt.correct { background: rgba(107,143,113,.12); border-color: var(--green); color: var(--green); }
+    .mc-opt.wrong   { background: rgba(196,96,58,.1);    border-color: var(--red);   color: var(--red);   }
+
+    /* Type input */
+    .type-input { width: 100%; padding: 13px 15px; border-radius: 12px; border: 2px solid rgba(27,42,74,.14); font-family: var(--arabic); font-size: 26px; direction: rtl; text-align: right; color: var(--navy); background: var(--white); outline: none; transition: border-color .18s; margin-bottom: 12px; }
+    .type-input:focus { border-color: var(--gold); }
+    .type-input:disabled { background: rgba(27,42,74,.03); }
+
+    /* Buttons */
+    .btn-submit { width: 100%; padding: 14px; background: var(--navy); color: #fff; border: none; border-radius: 12px; font-family: var(--ui); font-size: 15px; font-weight: 800; cursor: pointer; transition: opacity .13s, transform .13s; }
+    .btn-submit:hover:not(:disabled) { opacity: .88; }
+    .btn-submit:active { transform: scale(.97); }
+    .btn-submit:disabled { opacity: .4; cursor: default; }
+    .btn-next { width: 100%; padding: 14px; background: var(--gold); color: #fff; border: none; border-radius: 12px; font-family: var(--ui); font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 14px; transition: opacity .13s, transform .13s; letter-spacing: .3px; }
+    .btn-next:hover { opacity: .9; }
+    .btn-next:active { transform: scale(.97); }
+
+    /* Reveal */
+    .reveal { margin-top: 16px; padding: 15px 16px; border-radius: 12px; border: 1.5px solid; }
+    .reveal.correct { background: rgba(107,143,113,.1);  border-color: rgba(107,143,113,.35); }
+    .reveal.wrong   { background: rgba(196,96,58,.08);   border-color: rgba(196,96,58,.3);    }
+    .reveal-icon { font-size: 24px; margin-bottom: 6px; display: block; }
+    .reveal-text { font-size: 14px; color: var(--navy); line-height: 1.55; }
+    .reveal-answer { font-family: var(--arabic); font-size: 26px; direction: rtl; color: var(--navy); display: inline-block; margin: 4px 0 2px; }
+
+    /* Arabic keyboard */
+    .keyboard { position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; background: rgba(22,34,60,.97); padding: 10px 6px 12px; z-index: 200; border-top: 1px solid rgba(255,255,255,.08); }
+    .kb-row { display: flex; justify-content: center; gap: 4px; margin-bottom: 5px; direction: rtl; }
+    .key { background: rgba(255,255,255,.13); color: #fff; border: none; border-radius: 6px; padding: 9px 5px 8px; font-family: var(--arabic); font-size: 17px; cursor: pointer; flex: 1; max-width: 33px; text-align: center; transition: background .08s; line-height: 1; }
+    .key:active { background: rgba(255,255,255,.28); }
+    .key.wide  { max-width: 52px; font-family: var(--ui); font-size: 11px; flex: 1.6; }
+    .key.space { max-width: 140px; font-size: 11px; font-family: var(--ui); flex: 4; }
+
+    /* Bottom nav */
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; background: var(--white); border-top: 1.5px solid rgba(27,42,74,.09); display: flex; z-index: 300; box-shadow: 0 -4px 20px rgba(27,42,74,.07); }
+    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 11px 8px 9px; border: none; background: none; cursor: pointer; gap: 3px; transition: opacity .13s; }
+    .nav-btn:hover { opacity: .72; }
+    .nav-icon { font-size: 21px; }
+    .nav-label { font-size: 10px; font-weight: 800; color: rgba(27,42,74,.38); text-transform: uppercase; letter-spacing: .5px; }
+    .nav-btn.active .nav-label { color: var(--gold); }
+
+    /* Completion */
+    .completion { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 36px 24px 100px; }
+    .completion-moon { font-size: 64px; display: block; margin-bottom: 14px; animation: sway 3.5s ease-in-out infinite; }
+    @keyframes sway { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+    .completion-title { font-size: 26px; font-weight: 800; color: var(--navy); margin-bottom: 6px; }
+    .completion-sub   { font-size: 15px; color: rgba(27,42,74,.55); margin-bottom: 30px; }
+    .stat-grid { display: flex; gap: 14px; margin-bottom: 28px; }
+    .stat-box { background: var(--white); border-radius: 14px; padding: 16px 18px; box-shadow: var(--shadow); text-align: center; min-width: 88px; }
+    .stat-val { font-size: 28px; font-weight: 800; color: var(--gold); }
+    .stat-lbl { font-size: 11px; font-weight: 700; color: rgba(27,42,74,.45); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+    .arabic-blessing { font-family: var(--arabic); font-size: 18px; color: rgba(27,42,74,.45); direction: rtl; }
+
+    /* Journey */
+    .journey { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 22px 100px; text-align: center; }
+    .journey-icon  { font-size: 60px; margin-bottom: 18px; }
+    .journey-title { font-size: 24px; font-weight: 800; color: var(--navy); margin-bottom: 10px; }
+    .journey-desc  { font-size: 14.5px; color: rgba(27,42,74,.52); line-height: 1.65; max-width: 290px; margin-bottom: 30px; }
+    .info-row { width: 100%; background: var(--white); border-radius: 13px; padding: 13px 18px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .info-key { font-size: 13px; font-weight: 700; color: rgba(27,42,74,.55); }
+    .info-val { font-size: 18px; font-weight: 800; color: var(--navy); }
+
+    /* Animations */
+    @keyframes slideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    .slide-up { animation: slideUp .28s cubic-bezier(.4,0,.2,1) forwards; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .fade-in { animation: fadeIn .22s ease forwards; }
+
+    /* Skeleton shimmer */
+    @keyframes shimmer { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
+    .shimmer { animation: shimmer 1.4s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+/* ── Topic emoji map ──────────────────────────────────────────── */
+const TOPIC_EMOJI = {
+  greetings:'👋', numbers:'🔢', colors:'🎨', family:'👨‍👩‍👧',
+  days:'📅', months:'🗓️', 'verb conjugation':'⚡', 'noun gender':'⚖️',
+  'definite article':'📝', 'simple sentences':'💬', 'question words':'❓',
+  vocabulary:'📖', grammar:'✏️',
+};
+const topicEmoji = t => TOPIC_EMOJI[(t||'').toLowerCase()] ?? '📖';
+
+/* ── Normalize raw Claude card to unified shape ───────────────── */
+function normalizeCard(raw, id) {
+  const base = {
+    id, type: raw.type, topic: raw.topic ?? 'Arabic',
+    emoji: topicEmoji(raw.topic),
+    question_en: raw.question_en, question_ar: raw.question_ar,
+    explanation: raw.explanation_en,
+  };
+  if (raw.type === 'swipe')           return { ...base, isTrue: raw.answer === 'true' };
+  if (raw.type === 'multiple_choice') {
+    const opts = raw.options ?? [];
+    return { ...base, options: opts, correctIndex: opts.findIndex(o => o === raw.answer) };
+  }
+  return { ...base, expectedAnswer: raw.answer }; // type_answer
+}
+
+/* ── Fallback cards (when API unavailable) ────────────────────── */
+const FALLBACK = [
+  normalizeCard({ type:'swipe',           topic:'Vocabulary',       question_en:'كَلْب means "dog"',               question_ar:'كَلْب',       answer:'true',       explanation_en:'كَلْب (kalb) = dog. Plural: كِلاب.' }, 'f1'),
+  normalizeCard({ type:'multiple_choice', topic:'Greetings',        question_en:'How do you say "Good morning"?',                            answer:'صباح الخير', options:['مرحبا','صباح الخير','شكراً','مساء النور'], explanation_en:'صباح الخير (ṣabāḥ al-khayr). مرحبا = hello.' }, 'f2'),
+  normalizeCard({ type:'type_answer',     topic:'Numbers',           question_en:'Write the Arabic word for "three"',                         answer:'ثلاثة',      explanation_en:'ثلاثة (thalātha). واحد، اثنان، ثلاثة.' }, 'f3'),
+  normalizeCard({ type:'swipe',           topic:'Grammar',           question_en:'Arabic nouns have masculine and feminine grammatical gender.', answer:'true',      explanation_en:'Yes — feminine nouns usually end in ـة (tā marbūṭa).' }, 'f4'),
+  normalizeCard({ type:'multiple_choice', topic:'Colors',            question_en:'What does أَزْرَق (azraq) mean?', question_ar:'أَزْرَق',     answer:'Blue',       options:['Red','Green','Blue','Yellow'], explanation_en:'أَزْرَق = blue. أَحْمَر = red, أَخْضَر = green.' }, 'f5'),
+];
+
+/* ── Arabic keyboard layout ───────────────────────────────────── */
+const KB = [
+  ['ض','ص','ث','ق','ف','غ','ع','ه','خ','ح','ج','د'],
+  ['ش','س','ي','ب','ل','ا','ت','ن','م','ك','ط'],
+  ['ئ','ء','ؤ','ر','لا','ى','ة','و','ز','ظ'],
+];
+
+/* ── Weak-spot localStorage cache ─────────────────────────────── */
+const WS_KEY = 'arabiya_weak_spots';
+const getWS  = ()    => { try { return JSON.parse(localStorage.getItem(WS_KEY)||'[]'); } catch { return []; } };
+const setWS  = arr   => localStorage.setItem(WS_KEY, JSON.stringify(arr.slice(0,8)));
+const addWS  = topic => { const c=getWS(); if(!c.includes(topic)) setWS([topic,...c]); };
+const dropWS = topic => setWS(getWS().filter(t => t!==topic));
+
+/* ── API helpers ──────────────────────────────────────────────── */
+async function apiStreak() {
+  try {
+    const r = await fetch('/api/streak');
+    if (!r.ok) return null;
+    const d = await r.json();
+    if (Array.isArray(d.weak_spots)) setWS(d.weak_spots);
+    return d;
+  } catch { return null; }
+}
+
+async function apiCard(weakSpots=[]) {
+  try {
+    const r = await fetch('/api/card', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ weak_spots: weakSpots }),
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    return d.stubbed ? null : d;
+  } catch { return null; }
+}
+
+async function apiEvaluate(question, expected, user_answer) {
+  try {
+    const r = await fetch('/api/evaluate', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ question, expected, user_answer }),
+    });
+    return r.ok ? r.json() : null;
+  } catch { return null; }
+}
+
+async function apiRecord(card_type, topic, question, was_correct) {
+  try {
+    const r = await fetch('/api/record', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ card_type, topic, question, was_correct: was_correct?1:0 }),
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    if (Array.isArray(d.streak?.weak_spots)) setWS(d.streak.weak_spots);
+    return d;
+  } catch { return null; }
+}
+
+const isTouch = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+/* ════════════════════════════════════════════════════════════════
+   ArabicKeyboard
+════════════════════════════════════════════════════════════════ */
+function ArabicKeyboard({ onKey, onDone }) {
+  return (
+    <div className="keyboard">
+      {KB.map((row, ri) => (
+        <div key={ri} className="kb-row">
+          {row.map(ch => (
+            <button key={ch} className="key"
+              onMouseDown={e => { e.preventDefault(); onKey(ch); }}>
+              {ch}
+            </button>
+          ))}
+          {ri === 2 && (
+            <button className="key wide"
+              onMouseDown={e => { e.preventDefault(); onKey('⌫'); }}>⌫</button>
+          )}
+        </div>
+      ))}
+      <div className="kb-row" style={{ marginBottom:0 }}>
+        <button className="key space"
+          onMouseDown={e => { e.preventDefault(); onKey(' '); }}>مسافة</button>
+        <button className="key wide" style={{ maxWidth:58, fontSize:10, fontFamily:'Nunito' }}
+          onMouseDown={e => { e.preventDefault(); onDone(); }}>Done</button>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CardSkeleton
+════════════════════════════════════════════════════════════════ */
+function CardSkeleton() {
+  return (
+    <div className="slide-up" style={{ width:'100%' }}>
+      <div className="card shimmer" style={{ cursor:'default' }}>
+        <div className="card-chip" style={{ color:'transparent', background:'rgba(27,42,74,.07)' }}>loading</div>
+        <div className="q-area" style={{ minHeight:110, gap:12 }}>
+          <div style={{ width:'72%', height:28, background:'rgba(27,42,74,.07)', borderRadius:8 }} />
+          <div style={{ width:'50%', height:20, background:'rgba(27,42,74,.05)', borderRadius:6 }} />
+        </div>
+        <p style={{ textAlign:'center', fontSize:13, color:'rgba(27,42,74,.35)', fontWeight:600 }}>
+          Generating card…
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SwipeCard  — card.question_en, card.question_ar, card.isTrue
+════════════════════════════════════════════════════════════════ */
+function SwipeCard({ card, onAnswer }) {
+  const [dragX, setDragX]     = useState(0);
+  const [dragging, setDrag]   = useState(false);
+  const [startX, setStartX]   = useState(0);
+  const [flyDir, setFlyDir]   = useState(null);
+  const [answered, setDone]   = useState(false);
+  const [correct, setCorrect] = useState(null);
+  const THRESH = 88;
+
+  const resolve = useCallback((swipedRight) => {
+    const ok = swipedRight === card.isTrue;
+    setFlyDir(swipedRight ? 'right' : 'left');
+    setTimeout(() => { setCorrect(ok); setDone(true); setFlyDir(null); setDragX(0); }, 320);
+  }, [card.isTrue]);
+
+  const onMD = e => { setDrag(true); setStartX(e.clientX); };
+  const onTS = e => { setDrag(true); setStartX(e.touches[0].clientX); };
+  const onMM = useCallback(e => { if (dragging) setDragX(e.clientX - startX); }, [dragging, startX]);
+  const onTM = useCallback(e => { if (dragging) setDragX(e.touches[0].clientX - startX); }, [dragging, startX]);
+  const end  = useCallback(() => {
+    if (!dragging) return;
+    setDrag(false);
+    if (Math.abs(dragX) >= THRESH) resolve(dragX > 0);
+    else setDragX(0);
+  }, [dragging, dragX, resolve]);
+
+  useEffect(() => {
+    if (!dragging) return;
+    window.addEventListener('mousemove', onMM);
+    window.addEventListener('mouseup', end);
+    return () => { window.removeEventListener('mousemove', onMM); window.removeEventListener('mouseup', end); };
+  }, [dragging, onMM, end]);
+
+  const ind  = dragX > 32 ? 'yes' : dragX < -32 ? 'no' : null;
+  const flyX = flyDir === 'right' ? 520 : flyDir === 'left' ? -520 : null;
+  const style = {
+    transform: flyX != null
+      ? `translateX(${flyX}px) rotate(${flyX > 0 ? 20 : -20}deg)`
+      : `translateX(${dragX}px) rotate(${dragX / 22}deg)`,
+    transition: dragging ? 'none' : 'transform .32s ease',
+    cursor: dragging ? 'grabbing' : 'grab',
+  };
+
+  const QBody = () => (
+    <div className="q-area" style={{ minHeight:110 }}>
+      {card.question_ar && <span className="arabic" style={{ textAlign:'center' }}>{card.question_ar}</span>}
+      <p className="english">{card.question_en}</p>
+    </div>
+  );
+
+  if (answered) return (
+    <div className="slide-up">
+      <div className="card" style={{ cursor:'default' }}>
+        <div className="card-chip">{card.emoji} {card.topic} · True / False</div>
+        <QBody />
+        <div className={`reveal fade-in ${correct ? 'correct' : 'wrong'}`}>
+          <span className="reveal-icon">{correct ? '✅' : '❌'}</span>
+          <p className="reveal-text"><strong>{correct ? 'Correct!' : 'Not quite.'}</strong> {card.explanation}</p>
+        </div>
+        <button className="btn-next fade-in" onClick={() => onAnswer(correct)}>Next →</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="card" style={style}
+        onMouseDown={onMD} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={end}>
+        <div className="card-chip">{card.emoji} {card.topic} · True / False</div>
+        <QBody />
+        {ind === 'yes' && <div className="swipe-ov yes">✓</div>}
+        {ind === 'no'  && <div className="swipe-ov no">✗</div>}
+      </div>
+      <div className="swipe-btns">
+        <button className="swipe-btn no"  onClick={() => resolve(false)}>✗</button>
+        <button className="swipe-btn yes" onClick={() => resolve(true)}>✓</button>
+      </div>
+      <p className="swipe-hint">Swipe or tap  ✗ False · ✓ True</p>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MCCard  — card.question_en, card.options, card.correctIndex
+════════════════════════════════════════════════════════════════ */
+function MCCard({ card, onAnswer }) {
+  const [sel, setSel] = useState(null);
+  const done    = sel !== null;
+  const correct = sel === card.correctIndex;
+  const isAr    = s => /[؀-ۿ]/.test(s);
+
+  return (
+    <div className="slide-up">
+      <div className="card" style={{ cursor:'default' }}>
+        <div className="card-chip">{card.emoji} {card.topic} · Multiple Choice</div>
+        <div className="q-area">
+          {card.question_ar && <span className="arabic" style={{ textAlign:'center' }}>{card.question_ar}</span>}
+          <p className="english">{card.question_en}</p>
+        </div>
+        <div className="mc-list">
+          {(card.options??[]).map((opt, i) => {
+            let cls = `mc-opt${isAr(opt) ? '' : ' en'}`;
+            if (done) {
+              if (i === card.correctIndex) cls += ' correct';
+              else if (i === sel)          cls += ' wrong';
+            }
+            return (
+              <button key={i} className={cls} disabled={done}
+                onClick={() => !done && setSel(i)}>
+                {opt}
+              </button>
+            );
+          })}
+        </div>
+        {done && (
+          <>
+            <div className={`reveal fade-in ${correct ? 'correct' : 'wrong'}`}>
+              <span className="reveal-icon">{correct ? '✅' : '❌'}</span>
+              <p className="reveal-text"><strong>{correct ? 'Correct!' : 'Not quite.'}</strong> {card.explanation}</p>
+            </div>
+            <button className="btn-next fade-in" onClick={() => onAnswer(correct)}>Next →</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TypeCard  — card.question_en, card.expectedAnswer → /api/evaluate
+════════════════════════════════════════════════════════════════ */
+function TypeCard({ card, onAnswer }) {
+  const [value, setValue]     = useState('');
+  const [evaling, setEvaling] = useState(false);
+  const [done, setDone]       = useState(false);
+  const [correct, setCorrect] = useState(null);
+  const [feedback, setFeedback] = useState('');
+  const [showKb, setShowKb]   = useState(false);
+  const inputRef = useRef(null);
+  const touch = isTouch();
+
+  const submit = async () => {
+    if (!value.trim() || done || evaling) return;
+    setEvaling(true);
+    setShowKb(false);
+
+    const res = await apiEvaluate(card.question_en, card.expectedAnswer, value.trim());
+    if (res) {
+      setCorrect(res.correct);
+      setFeedback(res.feedback);
+    } else {
+      const norm = s => s.trim().replace(/[ً-ٟ]/g, '');
+      const ok   = norm(value) === norm(card.expectedAnswer);
+      setCorrect(ok);
+      setFeedback(ok ? 'Correct!' : `Expected: ${card.expectedAnswer}`);
+    }
+    setEvaling(false);
+    setDone(true);
+  };
+
+  const handleKey = ch => {
+    if (done || evaling) return;
+    if (ch === '⌫') setValue(v => v.slice(0,-1));
+    else setValue(v => v + ch);
+    inputRef.current?.focus();
+  };
+
+  return (
+    <div className="slide-up">
+      <div className="card" style={{ cursor:'default' }}>
+        <div className="card-chip">{card.emoji} {card.topic} · Write It</div>
+        <div className="q-area">
+          {card.question_ar && <span className="arabic" style={{ textAlign:'center' }}>{card.question_ar}</span>}
+          <p className="english">{card.question_en}</p>
+        </div>
+        <input ref={inputRef} className="type-input" type="text"
+          value={value} placeholder="اكتب هنا…"
+          disabled={done || evaling}
+          onChange={e => setValue(e.target.value)}
+          onFocus={() => !touch && setShowKb(true)}
+          onKeyDown={e => e.key==='Enter' && submit()} />
+        {!done && (
+          <button className="btn-submit" disabled={!value.trim() || evaling} onClick={submit}>
+            {evaling ? 'Evaluating…' : 'Submit'}
+          </button>
+        )}
+        {done && (
+          <>
+            <div className={`reveal fade-in ${correct ? 'correct' : 'wrong'}`}>
+              <span className="reveal-icon">{correct ? '✅' : '❌'}</span>
+              <p className="reveal-text">{feedback}</p>
+              {!correct && (
+                <p className="reveal-text" style={{ marginTop:6 }}>
+                  Answer: <span className="reveal-answer">{card.expectedAnswer}</span>
+                </p>
+              )}
+            </div>
+            <button className="btn-next fade-in" onClick={() => onAnswer(correct)}>Next →</button>
+          </>
+        )}
+      </div>
+      {showKb && !done && !evaling && (
+        <ArabicKeyboard onKey={handleKey} onDone={() => setShowKb(false)} />
+      )}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CompletionScreen
+════════════════════════════════════════════════════════════════ */
+function CompletionScreen({ streak, correctCount, total }) {
+  return (
+    <div className="completion slide-up">
+      <span className="completion-moon">🌙</span>
+      <h2 className="completion-title">Practice Complete!</h2>
+      <p className="completion-sub">See you tomorrow. You're doing great.</p>
+      <div className="stat-grid">
+        <div className="stat-box">
+          <div className="stat-val">🔥{streak.current_streak??0}</div>
+          <div className="stat-lbl">Day Streak</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-val">{correctCount}/{total}</div>
+          <div className="stat-lbl">Correct</div>
+        </div>
+        <div className="stat-box">
+          <div className="stat-val">{streak.total_cards_ever??0}</div>
+          <div className="stat-lbl">All Time</div>
+        </div>
+      </div>
+      <span className="arabic-blessing">بارك الله فيك</span>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   HomePage  — fetches cards from /api/card, falls back to FALLBACK
+════════════════════════════════════════════════════════════════ */
+const DAILY_GOAL = 5;
+
+function HomePage({ streak, onStreakUpdate }) {
+  const [cardIdx, setCardIdx]   = useState(0);
+  const [card, setCard]         = useState(null);
+  const [loading, setLoading]   = useState(true);
+  const [correctCt, setCorrect] = useState(0);
+  const [done, setDone]         = useState(false);
+
+  const fetchCard = useCallback(async (idx) => {
+    setLoading(true);
+    setCard(null);
+    const raw = await apiCard(getWS());
+    setCard(raw ? normalizeCard(raw, idx) : FALLBACK[idx % FALLBACK.length]);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchCard(0); }, []);
+
+  const handleAnswer = async (wasCorrect) => {
+    if (wasCorrect) {
+      setCorrect(c => c+1);
+      if (card?.topic) dropWS(card.topic);
+    } else {
+      if (card?.topic) addWS(card.topic);
+    }
+
+    const res = await apiRecord(card.type, card.topic, card.question_en||'', wasCorrect);
+    if (res?.streak) onStreakUpdate(res.streak);
+
+    const next = cardIdx + 1;
+    if (next >= DAILY_GOAL) { setDone(true); }
+    else { setCardIdx(next); fetchCard(next); }
+  };
+
+  if (done) return <CompletionScreen streak={streak} correctCount={correctCt} total={DAILY_GOAL} />;
+
+  return (
+    <>
+      <div className="progress-wrap">
+        <div className="progress-track">
+          <div className="progress-fill" style={{ width:`${(cardIdx/DAILY_GOAL)*100}%` }} />
+        </div>
+        <p className="progress-label">{cardIdx} / {DAILY_GOAL} cards today</p>
+      </div>
+      <div className="main">
+        {loading && <CardSkeleton />}
+        {!loading && card?.type === 'swipe'           && <SwipeCard key={card.id} card={card} onAnswer={handleAnswer} />}
+        {!loading && card?.type === 'multiple_choice' && <MCCard    key={card.id} card={card} onAnswer={handleAnswer} />}
+        {!loading && card?.type === 'type_answer'     && <TypeCard  key={card.id} card={card} onAnswer={handleAnswer} />}
+      </div>
+    </>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   JourneyPage
+════════════════════════════════════════════════════════════════ */
+function JourneyPage({ streak }) {
+  const spots = getWS();
+  return (
+    <div className="journey slide-up">
+      <div className="journey-icon">🗺️</div>
+      <h2 className="journey-title">Your Journey</h2>
+      <p className="journey-desc">
+        Progress tracking, learning path, and achievements coming soon.
+      </p>
+      <div style={{ width:'100%' }}>
+        <div className="info-row">
+          <span className="info-key">🔥 Current Streak</span>
+          <span className="info-val">{streak.current_streak??0} days</span>
+        </div>
+        <div className="info-row">
+          <span className="info-key">📚 Cards Today</span>
+          <span className="info-val">{streak.cards_today??0} / {streak.daily_goal??5}</span>
+        </div>
+        <div className="info-row">
+          <span className="info-key">🏆 Total Cards</span>
+          <span className="info-val">{streak.total_cards_ever??0}</span>
+        </div>
+        {spots.length > 0 && (
+          <div className="info-row" style={{ flexDirection:'column', alignItems:'flex-start', gap:8 }}>
+            <span className="info-key">🎯 Needs Practice</span>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginTop:2 }}>
+              {spots.map(t => (
+                <span key={t} style={{ background:'rgba(196,96,58,.1)', color:'var(--red)', borderRadius:20, padding:'3px 10px', fontSize:12, fontWeight:700 }}>{t}</span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   App
+════════════════════════════════════════════════════════════════ */
+function App() {
+  const [route, setRoute] = useState(window.location.hash || '#/');
+  const [streak, setStreak] = useState({
+    current_streak:0, cards_today:0, daily_goal:5, total_cards_ever:0,
+  });
+
+  useEffect(() => {
+    apiStreak().then(s => { if (s) setStreak(s); });
+    const onHash = () => setRoute(window.location.hash || '#/');
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  const navigate = hash => {
+    window.location.hash = hash.replace(/^#/,'');
+    setRoute(hash);
+  };
+
+  return (
+    <>
+      <div className="header">
+        <div className="logo">
+          <span className="logo-ar">عربية</span>
+          Arabiya
+        </div>
+        <div className="streak-pill">
+          <span>🔥</span>
+          <span>{streak.current_streak??0}</span>
+        </div>
+      </div>
+
+      {route === '#/'        && <HomePage    streak={streak} onStreakUpdate={setStreak} />}
+      {route === '#/journey' && <JourneyPage streak={streak} />}
+
+      <nav className="bottom-nav">
+        <button className={`nav-btn ${route==='#/' ? 'active':''}`} onClick={() => navigate('#/')}>
+          <span className="nav-icon">🃏</span>
+          <span className="nav-label">Cards</span>
+        </button>
+        <button className={`nav-btn ${route==='#/journey' ? 'active':''}`} onClick={() => navigate('#/journey')}>
+          <span className="nav-icon">🗺️</span>
+          <span className="nav-label">Journey</span>
+        </button>
+      </nav>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
