@@ -13,16 +13,45 @@ const json = (data, status = 200) =>
 const todayStr     = () => new Date().toISOString().split('T')[0];
 const yesterdayStr = () => new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
-// ── Migrations (idempotent) ──────────────────────────────────────
+// ── Migrations (idempotent — all steps are safe to re-run) ───────
 async function migrate(db) {
   const steps = [
-    `ALTER TABLE cards_history ADD COLUMN user TEXT DEFAULT 'Ali'`,
-    `ALTER TABLE weak_spots    ADD COLUMN user TEXT DEFAULT 'Ali'`,
-    `ALTER TABLE streak        ADD COLUMN user TEXT DEFAULT 'Ali'`,
+    // Create core tables if they don't exist yet
+    `CREATE TABLE IF NOT EXISTS cards_history (
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+       card_type TEXT,
+       topic TEXT,
+       question TEXT,
+       was_correct INTEGER,
+       user TEXT DEFAULT 'Ali',
+       created_at TEXT DEFAULT (datetime('now'))
+     )`,
+    `CREATE TABLE IF NOT EXISTS streak (
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+       user TEXT DEFAULT 'Ali',
+       current_streak INTEGER DEFAULT 0,
+       last_practice_date TEXT,
+       total_cards_ever INTEGER DEFAULT 0,
+       daily_goal INTEGER DEFAULT 5,
+       cards_today INTEGER DEFAULT 0,
+       last_reset_date TEXT
+     )`,
+    `CREATE TABLE IF NOT EXISTS weak_spots (
+       topic TEXT PRIMARY KEY,
+       user TEXT DEFAULT 'Ali',
+       wrong_count INTEGER DEFAULT 0,
+       correct_count INTEGER DEFAULT 0,
+       last_seen TEXT
+     )`,
     `CREATE TABLE IF NOT EXISTS user_profiles (
        username TEXT PRIMARY KEY,
        created_at TEXT DEFAULT (datetime('now'))
      )`,
+    // Add columns if upgrading from old schema (errors silently ignored)
+    `ALTER TABLE cards_history ADD COLUMN user TEXT DEFAULT 'Ali'`,
+    `ALTER TABLE weak_spots    ADD COLUMN user TEXT DEFAULT 'Ali'`,
+    `ALTER TABLE streak        ADD COLUMN user TEXT DEFAULT 'Ali'`,
+    // Seed default user
     `INSERT OR IGNORE INTO user_profiles (username) VALUES ('Ali')`,
   ];
   for (const sql of steps) {
