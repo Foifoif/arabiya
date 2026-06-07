@@ -13,46 +13,47 @@ const json = (data, status = 200) =>
 const todayStr     = () => new Date().toISOString().split('T')[0];
 const yesterdayStr = () => new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
-// ── Migrations (idempotent — all steps are safe to re-run) ───────
+// ── Migrations ───────────────────────────────────────────────────
 async function migrate(db) {
   const steps = [
-    // Create core tables if they don't exist yet
     `CREATE TABLE IF NOT EXISTS cards_history (
        id INTEGER PRIMARY KEY AUTOINCREMENT,
-       card_type TEXT,
-       topic TEXT,
-       question TEXT,
-       was_correct INTEGER,
-       user TEXT DEFAULT 'Ali',
+       card_type TEXT, topic TEXT, question TEXT,
+       was_correct INTEGER, user TEXT DEFAULT 'Ali',
        created_at TEXT DEFAULT (datetime('now'))
      )`,
     `CREATE TABLE IF NOT EXISTS streak (
        id INTEGER PRIMARY KEY AUTOINCREMENT,
-       user TEXT DEFAULT 'Ali',
-       current_streak INTEGER DEFAULT 0,
-       last_practice_date TEXT,
-       total_cards_ever INTEGER DEFAULT 0,
-       daily_goal INTEGER DEFAULT 5,
-       cards_today INTEGER DEFAULT 0,
+       user TEXT DEFAULT 'Ali', current_streak INTEGER DEFAULT 0,
+       last_practice_date TEXT, total_cards_ever INTEGER DEFAULT 0,
+       daily_goal INTEGER DEFAULT 5, cards_today INTEGER DEFAULT 0,
        last_reset_date TEXT
      )`,
     `CREATE TABLE IF NOT EXISTS weak_spots (
-       topic TEXT PRIMARY KEY,
-       user TEXT DEFAULT 'Ali',
-       wrong_count INTEGER DEFAULT 0,
-       correct_count INTEGER DEFAULT 0,
+       topic TEXT PRIMARY KEY, user TEXT DEFAULT 'Ali',
+       wrong_count INTEGER DEFAULT 0, correct_count INTEGER DEFAULT 0,
        last_seen TEXT
      )`,
     `CREATE TABLE IF NOT EXISTS user_profiles (
        username TEXT PRIMARY KEY,
        created_at TEXT DEFAULT (datetime('now'))
      )`,
-    // Add columns if upgrading from old schema (errors silently ignored)
+    // Stores exam results + ongoing topic mastery (0-100 per topic, JSON blob)
+    `CREATE TABLE IF NOT EXISTS user_knowledge (
+       username TEXT PRIMARY KEY,
+       level TEXT DEFAULT 'beginner',
+       overall_score REAL DEFAULT 0,
+       topic_scores TEXT DEFAULT '{}',
+       summary TEXT DEFAULT '',
+       exam_completed INTEGER DEFAULT 0,
+       exam_completed_at TEXT,
+       last_updated TEXT DEFAULT (datetime('now'))
+     )`,
     `ALTER TABLE cards_history ADD COLUMN user TEXT DEFAULT 'Ali'`,
     `ALTER TABLE weak_spots    ADD COLUMN user TEXT DEFAULT 'Ali'`,
     `ALTER TABLE streak        ADD COLUMN user TEXT DEFAULT 'Ali'`,
-    // Seed default user
     `INSERT OR IGNORE INTO user_profiles (username) VALUES ('Ali')`,
+    `INSERT OR IGNORE INTO user_knowledge (username) VALUES ('Ali')`,
   ];
   for (const sql of steps) {
     try { await db.prepare(sql).run(); } catch {}
@@ -75,10 +76,7 @@ async function callClaude(apiKey, { system, userMsg, maxTokens = 700 }) {
       messages: [{ role: 'user', content: userMsg }],
     }),
   });
-  if (!res.ok) {
-    const errBody = await res.text();
-    throw new Error(`Claude ${res.status}: ${errBody}`);
-  }
+  if (!res.ok) throw new Error(`Claude ${res.status}: ${await res.text()}`);
   return (await res.json()).content[0].text;
 }
 
@@ -86,66 +84,6 @@ function parseClaudeJSON(text) {
   const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   return JSON.parse(fence ? fence[1].trim() : text.trim());
 }
-
-// ── System prompts ───────────────────────────────────────────────
-
-// SESSION_SYSTEM generates all 5 cards at once — long enough (>1024 tokens)
-// to be eligible for Anthropic prompt caching.
-const SESSION_SYSTEM = `You are a warm, encouraging Arabic tutor. Your student is at an elementary Modern Standard Arabic (MSA) level, working through "Mastering Arabic Book 1" by Jane Wightwick and Mahmoud Gaafar.
-
-## Student Profile
-- Elementary MSA level
-- Knows the Arabic alphabet and can read basic script
-- Building vocabulary, simple grammar, and conversational foundations
-- Learns best with clear explanations and variety
-
-## Full Curriculum — Book 1 Syllabus
-1. Greetings & Introductions: مرحبا، أهلاً وسهلاً، السلام عليكم، كيف حالك، اسمي، أنا من، تشرفنا
-2. Numbers 1–100: واحد، اثنان، ثلاثة، أربعة، خمسة، ستة، سبعة، ثمانية، تسعة، عشرة، أحد عشر... عشرون، ثلاثون، أربعون، مئة
-3. Colors: أحمر، أزرق، أخضر، أصفر، أبيض، أسود، برتقالي، بنفسجي، بني، رمادي، وردي
-4. Family Members: أب، أم، أخ، أخت، ابن، بنت، جد، جدة، عم، عمة، خال، خالة، زوج، زوجة، ابن عم
-5. Days of the Week: الأحد، الاثنين، الثلاثاء، الأربعاء، الخميس، الجمعة، السبت
-6. Months of the Year: يناير، فبراير، مارس، أبريل، مايو، يونيو، يوليو، أغسطس، سبتمبر، أكتوبر، نوفمبر، ديسمبر
-7. Definite Article (ال): sun letters (ش س ص ض ط ظ ت ث د ذ ر ز ن ل) vs moon letters; assimilation rules (الشمس vs القمر)
-8. Noun Gender: masculine vs feminine; tā marbūṭa (ة) marks feminine; common exceptions (أم، أخت); dual forms
-9. Present Tense Verbs (المضارع): أنا أذهب / أكتب / أقرأ، أنت تذهب، هو يذهب، هي تذهب، نحن نذهب، أنتم تذهبون، هم يذهبون
-10. Question Words: ما (what), من (who), أين (where), كيف (how), متى (when), لماذا (why), كم (how many/much), هل (yes/no question marker)
-11. Simple Sentences & Nominal Sentences: Subject + predicate (أنا طالب، البيت كبير); verb-subject-object order
-12. Adjective Agreement: gender and definiteness must agree (المنزل الكبير، البنت الصغيرة، كتاب جديد)
-13. Genitive Construction (الإضافة): connecting two nouns (كتاب الطالب، باب البيت، مدينة القاهرة)
-14. Common Vocabulary — Food: خبز، ماء، عصير، لحم، دجاج، سمك، خضروات، فاكهة، أرز، شاي، قهوة
-15. Common Vocabulary — Places: مدرسة، بيت، مكتب، سوق، مستشفى، مطعم، مطار، فندق، مسجد، متحف
-16. Prepositions: في (in/at), على (on), من (from), إلى (to), مع (with), بين (between), أمام (in front of), خلف (behind), فوق (above), تحت (under)
-17. Plurals: sound masculine plural (معلمون/معلمين), sound feminine plural (معلمات), broken plurals (كتاب→كتب، بيت→بيوت، رجل→رجال)
-
-## Your Task
-Generate exactly 15 practice cards as a valid JSON array. Mix the three card types evenly (5 swipe, 5 multiple_choice, 5 type_answer). Vary difficulty gradually — cards 1–5 easy, 6–10 medium, 11–15 challenging.
-
-## Output Format — return ONLY this JSON array, no other text:
-[
-  {
-    "type": "swipe" | "multiple_choice" | "type_answer",
-    "topic": "string",
-    "question_en": "string",
-    "question_ar": "string (optional — include when Arabic script recognition is part of the challenge)",
-    "answer": "string",
-    "options": ["string","string","string","string"],
-    "explanation_en": "string (1–2 sentences)"
-  }
-]
-
-## Rules by Card Type
-- swipe: answer must be exactly "true" or "false". question_en is a factual statement the student judges.
-- multiple_choice: answer is the exact correct option string. options array must have exactly 4 items. Distractors should be plausible but clearly wrong.
-- type_answer: answer is what the student types — either an Arabic word/phrase or its English translation. Accept the simplest common form.
-
-## Quality Standards
-- Include question_ar whenever the card involves reading or writing Arabic script
-- Never repeat the same question twice within the 15 cards
-- Vary topics across the full set even when focusing on a theme
-- Explanations should teach — briefly explain why, not just restate the answer`;
-
-const EVAL_SYSTEM = `You are an Arabic tutor evaluating a student's typed answer. Be generous: accept answers that are semantically correct even with minor spelling variants, missing or extra vowel marks (harakat), or slight transliteration differences. Respond ONLY with valid JSON: { "correct": boolean, "feedback": string }. Keep feedback to 1 short sentence — encouraging if correct, gently corrective if wrong (include the right answer).`;
 
 // ── DB helpers ───────────────────────────────────────────────────
 async function ensureStreak(db, user) {
@@ -179,6 +117,111 @@ async function recentHistory(db, user, limit = 25) {
   return r.results ?? [];
 }
 
+// Build a concise knowledge summary to include in session prompts (~100 tokens)
+function buildKnowledgeSummary(knowledge) {
+  if (!knowledge || !knowledge.exam_completed) return '';
+  let scores = {};
+  try { scores = JSON.parse(knowledge.topic_scores || '{}'); } catch {}
+  const entries  = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const strong   = entries.filter(([,v]) => v >= 70).map(([k,v]) => `${k} (${v}%)`).join(', ');
+  const weak     = entries.filter(([,v]) => v <  50).map(([k,v]) => `${k} (${v}%)`).join(', ');
+  return [
+    `\nStudent Knowledge Profile (from placement exam + ongoing practice):`,
+    `- Level: ${knowledge.level} | Overall score: ${Math.round(knowledge.overall_score)}/100`,
+    strong ? `- Strong topics: ${strong}` : '',
+    weak   ? `- Needs work: ${weak}`      : '',
+    knowledge.summary ? `- Note: ${knowledge.summary}` : '',
+  ].filter(Boolean).join('\n');
+}
+
+// Recompute topic mastery from cards_history after each session
+async function refreshTopicScores(db, user) {
+  const r = await db.prepare(`
+    SELECT topic,
+           COUNT(*) as total,
+           SUM(was_correct) as correct
+    FROM cards_history WHERE user = ?
+    GROUP BY topic
+    HAVING total >= 3
+  `).bind(user).all();
+  if (!r.results?.length) return;
+
+  const existing = await db.prepare('SELECT topic_scores FROM user_knowledge WHERE username = ?').bind(user).first();
+  let scores = {};
+  try { scores = JSON.parse(existing?.topic_scores || '{}'); } catch {}
+
+  for (const row of r.results) {
+    scores[row.topic] = Math.round((row.correct / row.total) * 100);
+  }
+  await db.prepare('UPDATE user_knowledge SET topic_scores = ?, last_updated = datetime(\'now\') WHERE username = ?')
+    .bind(JSON.stringify(scores), user).run();
+}
+
+// ── System prompts ───────────────────────────────────────────────
+const SESSION_SYSTEM = `You are a warm, encouraging Arabic tutor. Your student is working through "Mastering Arabic Book 1" by Jane Wightwick and Mahmoud Gaafar.
+
+## Curriculum Topics
+1. Greetings & Introductions: مرحبا، أهلاً، السلام عليكم، كيف حالك، اسمي، أنا من
+2. Numbers 1–100: واحد، اثنان، ثلاثة... عشرة، عشرون، مئة
+3. Colors: أحمر، أزرق، أخضر، أصفر، أبيض، أسود، برتقالي، بنفسجي
+4. Family: أب، أم، أخ، أخت، ابن، بنت، جد، جدة، عم، خال، زوج، زوجة
+5. Days: الأحد، الاثنين، الثلاثاء، الأربعاء، الخميس، الجمعة، السبت
+6. Months: يناير، فبراير، مارس، أبريل، مايو، يونيو، يوليو، أغسطس، سبتمبر، أكتوبر، نوفمبر، ديسمبر
+7. Definite Article ال: sun vs moon letters, assimilation
+8. Noun Gender: masculine/feminine, tā marbūṭa (ة), exceptions
+9. Present Tense Verbs: أنا أذهب، أنت تذهب، هو/هي يذهب/تذهب، نحن نذهب
+10. Question Words: ما، من، أين، كيف، متى، لماذا، كم، هل
+11. Simple Sentences & Nominal Sentences
+12. Adjective Agreement: gender and definiteness
+13. Genitive Construction (الإضافة)
+14. Vocabulary: food, places, objects, weather
+15. Prepositions: في، على، من، إلى، مع، بين، أمام، خلف
+16. Plurals: sound masculine/feminine, broken plurals
+
+## Output Format — return ONLY a JSON array of exactly 15 cards:
+[{"type":"swipe"|"multiple_choice"|"type_answer","topic":"string","question_en":"string","question_ar":"string","answer":"string","options":["string","string","string","string"],"explanation_en":"string"}]
+
+Rules:
+- Mix types evenly (5 swipe, 5 multiple_choice, 5 type_answer)
+- Vary difficulty: cards 1–5 easy, 6–10 medium, 11–15 harder
+- swipe: answer is exactly "true" or "false"
+- multiple_choice: answer is the exact correct option string, exactly 4 options
+- type_answer: answer is what the student types
+- Include question_ar when Arabic script recognition is relevant
+- Never repeat questions within the 15 cards
+- Tailor difficulty and topic selection to the student profile if provided`;
+
+const EXAM_GEN_SYSTEM = `You are an Arabic language assessor creating a placement exam. Generate exactly 12 diagnostic questions spanning the full beginner-to-intermediate range.
+
+Structure:
+- Questions 1–4: Easy (basic greetings, simple vocabulary, true/false script recognition)
+- Questions 5–8: Medium (numbers, colors, family, days/months)
+- Questions 9–12: Harder (verb conjugation, noun gender, definite article, simple reading)
+
+Mix types: 4 swipe, 4 multiple_choice, 4 type_answer. Cover at least 8 different topics.
+
+Return ONLY a JSON array of 12 cards:
+[{"type":"swipe"|"multiple_choice"|"type_answer","topic":"string","question_en":"string","question_ar":"string","answer":"string","options":["string","string","string","string"],"explanation_en":"string"}]
+
+Rules same as regular cards. Make questions unambiguous and clearly assessable.`;
+
+const EXAM_EVAL_SYSTEM = `You are evaluating Arabic placement exam results. The student answered 12 diagnostic questions. You will receive the topic and result (correct/incorrect) for each.
+
+Assign mastery scores and determine their level.
+
+Return ONLY valid JSON:
+{
+  "level": "beginner"|"elementary"|"intermediate"|"upper-intermediate",
+  "overall_score": 0-100,
+  "topic_scores": { "topic_name": 0-100 },
+  "summary": "2 encouraging sentences: one about what they know, one about what to focus on"
+}
+
+Level thresholds: beginner <30%, elementary 30–60%, intermediate 60–80%, upper-intermediate 80%+
+Topic scores: 100 if correct, 0 if incorrect (for topics with one question). Average if multiple questions per topic.`;
+
+const EVAL_SYSTEM = `You are an Arabic tutor evaluating a student's typed answer. Be generous: accept answers that are semantically correct even with minor spelling variants, missing/extra vowel marks (harakat), or slight transliteration differences. Respond ONLY with valid JSON: { "correct": boolean, "feedback": string }. Keep feedback to 1 short sentence.`;
+
 // ════════════════════════════════════════════════════════════════
 export async function onRequest(context) {
   const { request, env } = context;
@@ -201,28 +244,85 @@ export async function onRequest(context) {
       return json({ ...row, weak_spots: spots, users: profiles.results?.map(r => r.username) ?? ['Ali'] });
     }
 
+    // ── GET /api/knowledge ─────────────────────────────────────
+    if (method === 'GET' && path === '/api/knowledge') {
+      const user = url.searchParams.get('user') || 'Ali';
+      await env.DB.prepare('INSERT OR IGNORE INTO user_knowledge (username) VALUES (?)').bind(user).run();
+      const row = await env.DB.prepare('SELECT * FROM user_knowledge WHERE username = ?').bind(user).first();
+      return json(row ?? { username: user, exam_completed: 0 });
+    }
+
+    // ── POST /api/exam/generate ────────────────────────────────
+    if (method === 'POST' && path === '/api/exam/generate') {
+      const raw = await callClaude(env.ANTHROPIC_API_KEY, {
+        system:   EXAM_GEN_SYSTEM,
+        userMsg:  'Generate the 12-question placement exam now.',
+        maxTokens: 4000,
+      });
+      return json({ questions: parseClaudeJSON(raw) });
+    }
+
+    // ── POST /api/exam/evaluate ────────────────────────────────
+    // answers: [{ topic, was_correct }]
+    if (method === 'POST' && path === '/api/exam/evaluate') {
+      const { user = 'Ali', answers = [] } = await request.json();
+
+      const total   = answers.length;
+      const correct = answers.filter(a => a.was_correct).length;
+
+      const answersStr = answers.map((a, i) =>
+        `${i + 1}. [${a.topic}] ${a.was_correct ? '✓ correct' : '✗ incorrect'}`
+      ).join('\n');
+
+      const raw = await callClaude(env.ANTHROPIC_API_KEY, {
+        system:   EXAM_EVAL_SYSTEM,
+        userMsg:  `Student answered ${correct}/${total} correctly:\n\n${answersStr}`,
+        maxTokens: 600,
+      });
+
+      const profile = parseClaudeJSON(raw);
+
+      await env.DB.prepare(`
+        INSERT OR REPLACE INTO user_knowledge
+          (username, level, overall_score, topic_scores, summary, exam_completed, exam_completed_at, last_updated)
+        VALUES (?, ?, ?, ?, ?, 1, datetime('now'), datetime('now'))
+      `).bind(user, profile.level, profile.overall_score,
+               JSON.stringify(profile.topic_scores ?? {}), profile.summary ?? '').run();
+
+      return json(profile);
+    }
+
+    // ── POST /api/exam/skip ────────────────────────────────────
+    if (method === 'POST' && path === '/api/exam/skip') {
+      const { user = 'Ali' } = await request.json().catch(() => ({}));
+      await env.DB.prepare(`
+        INSERT OR REPLACE INTO user_knowledge
+          (username, level, overall_score, topic_scores, summary, exam_completed, exam_completed_at, last_updated)
+        VALUES (?, 'beginner', 0, '{}', 'Starting from scratch — every expert was once a beginner!', 1, datetime('now'), datetime('now'))
+      `).bind(user).run();
+      return json({ ok: true, level: 'beginner' });
+    }
+
     // ── POST /api/session ──────────────────────────────────────
-    // Generates all 5 cards in ONE Claude call with prompt caching.
-    // Frontend caches the result in localStorage — refreshing is free.
     if (method === 'POST' && path === '/api/session') {
       const { user = 'Ali', learning_goal = '', weak_spots = [] } = await request.json().catch(() => ({}));
 
-      const history = await recentHistory(env.DB, user, 25);
-      const recentStr = history.length
+      const [history, knowledge] = await Promise.all([
+        recentHistory(env.DB, user, 25),
+        env.DB.prepare('SELECT * FROM user_knowledge WHERE username = ?').bind(user).first(),
+      ]);
+
+      const recentStr    = history.length
         ? history.map(c => `- [${c.topic}] ${c.question}`).join('\n')
         : '';
+      const profileStr   = buildKnowledgeSummary(knowledge);
 
       const parts = [];
-      if (learning_goal.trim()) {
-        parts.push(`The student specifically asked to focus on: "${learning_goal.trim()}". Generate all 5 cards around this topic/goal, but vary the card types and difficulty.`);
-      } else if (weak_spots.length) {
-        parts.push(`Prioritize these topics the student struggles with: ${weak_spots.join(', ')}.`);
-      } else {
-        parts.push('Choose varied topics appropriate for this level, mixing different areas of the curriculum.');
-      }
-      if (recentStr) {
-        parts.push(`\nAvoid repeating questions the student has already seen recently:\n${recentStr}`);
-      }
+      if (learning_goal.trim()) parts.push(`The student wants to focus on: "${learning_goal.trim()}". Generate all 15 cards around this theme, varying types and difficulty.`);
+      else if (weak_spots.length) parts.push(`Prioritize weak topics: ${weak_spots.join(', ')}.`);
+      else parts.push('Choose varied topics appropriate for this student.');
+      if (profileStr)  parts.push(profileStr);
+      if (recentStr)   parts.push(`\nAvoid repeating these recently seen questions:\n${recentStr}`);
 
       const raw   = await callClaude(env.ANTHROPIC_API_KEY, {
         system:   SESSION_SYSTEM,
@@ -230,8 +330,7 @@ export async function onRequest(context) {
         maxTokens: 6000,
       });
 
-      const cards = parseClaudeJSON(raw);
-      return json({ cards: Array.isArray(cards) ? cards : [cards] });
+      return json({ cards: parseClaudeJSON(raw) });
     }
 
     // ── POST /api/evaluate ─────────────────────────────────────
@@ -276,6 +375,9 @@ export async function onRequest(context) {
           last_seen     = datetime('now')
       `).bind(topic, user, was_correct ? 0 : 1, was_correct ? 1 : 0).run();
 
+      // Refresh topic mastery scores in user_knowledge from full history
+      await refreshTopicScores(env.DB, user);
+
       const updated = await env.DB.prepare('SELECT * FROM streak WHERE user = ? LIMIT 1').bind(user).first();
       const spots   = await topWeakSpots(env.DB, user);
       return json({ ok: true, streak: { ...updated, weak_spots: spots } });
@@ -286,6 +388,7 @@ export async function onRequest(context) {
       const { username } = await request.json();
       if (!username?.trim()) return json({ error: 'username required' }, 400);
       await env.DB.prepare('INSERT OR IGNORE INTO user_profiles (username) VALUES (?)').bind(username.trim()).run();
+      await env.DB.prepare('INSERT OR IGNORE INTO user_knowledge (username) VALUES (?)').bind(username.trim()).run();
       return json({ ok: true });
     }
 

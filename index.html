@@ -201,6 +201,39 @@
     .info-key { font-size: 13px; font-weight: 700; color: rgba(27,42,74,.55); }
     .info-val { font-size: 18px; font-weight: 800; color: var(--navy); }
 
+    /* ── Exam flow ───────────────────────────────────────────── */
+    .exam-banner {
+      background: var(--navy); color: #fff;
+      padding: 10px 20px 12px; text-align: center;
+    }
+    .exam-banner-label { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; opacity: .55; margin-bottom: 2px; }
+    .exam-banner-prog  { font-size: 20px; font-weight: 800; }
+
+    .exam-intro {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 36px 24px 40px; text-align: center;
+    }
+    .exam-intro-icon  { font-size: 56px; margin-bottom: 18px; }
+    .exam-intro-title { font-size: 24px; font-weight: 800; color: var(--navy); margin-bottom: 12px; }
+    .exam-intro-desc  { font-size: 14.5px; color: rgba(27,42,74,.55); line-height: 1.7; max-width: 300px; margin-bottom: 32px; }
+    .btn-exam-start { width: 100%; max-width: 300px; padding: 15px; background: var(--gold); color: #fff; border: none; border-radius: 14px; font-family: var(--ui); font-size: 16px; font-weight: 800; cursor: pointer; margin-bottom: 12px; }
+    .btn-exam-skip  { background: none; border: none; font-family: var(--ui); font-size: 13px; font-weight: 700; color: rgba(27,42,74,.4); cursor: pointer; text-decoration: underline; }
+
+    .exam-results { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 28px 22px 40px; overflow-y: auto; }
+    .level-badge { display: inline-block; padding: 6px 20px; border-radius: 20px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+    .level-badge.beginner         { background: rgba(27,42,74,.1);  color: var(--navy); }
+    .level-badge.elementary       { background: rgba(201,150,58,.15); color: var(--gold); }
+    .level-badge.intermediate     { background: rgba(107,143,113,.15); color: var(--green); }
+    .level-badge.upper-intermediate { background: rgba(107,143,113,.25); color: #4a7350; }
+    .results-title   { font-size: 22px; font-weight: 800; color: var(--navy); margin-bottom: 6px; }
+    .results-summary { font-size: 14px; color: rgba(27,42,74,.6); line-height: 1.6; text-align: center; max-width: 320px; margin-bottom: 24px; }
+    .topic-list { width: 100%; margin-bottom: 24px; }
+    .topic-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .topic-name { font-size: 12px; font-weight: 700; color: var(--navy); width: 130px; flex-shrink: 0; text-align: right; }
+    .topic-bar-bg { flex: 1; height: 8px; background: rgba(27,42,74,.1); border-radius: 4px; overflow: hidden; }
+    .topic-bar-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
+    .topic-pct { font-size: 11px; font-weight: 700; color: rgba(27,42,74,.5); width: 32px; text-align: right; flex-shrink: 0; }
+
     /* ── Animations ──────────────────────────────────────────── */
     @keyframes slideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
     .slide-up { animation: slideUp .28s cubic-bezier(.4,0,.2,1) forwards; }
@@ -371,6 +404,30 @@ async function apiAddUser(username) {
   try { await fetch('/api/users', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username }) }); } catch {}
 }
 
+async function apiKnowledge(user) {
+  try { const r = await fetch(`/api/knowledge?user=${encodeURIComponent(user)}`); return r.ok ? r.json() : null; }
+  catch { return null; }
+}
+
+async function apiExamGenerate() {
+  const r = await fetch('/api/exam/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
+  if (!r.ok) throw new Error(`Exam generate failed: ${r.status}`);
+  return r.json();
+}
+
+async function apiExamEvaluate(user, answers) {
+  const r = await fetch('/api/exam/evaluate', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ user, answers }),
+  });
+  if (!r.ok) throw new Error(`Exam evaluate failed: ${r.status}`);
+  return r.json();
+}
+
+async function apiExamSkip(user) {
+  await fetch('/api/exam/skip', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ user }) });
+}
+
 const isTouch = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 /* ════════════════════════════════════════════════════════════════
@@ -470,6 +527,155 @@ function LearningGoalBar({ currentGoal, chips, onSubmit, disabled }) {
         </p>
       )}
     </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ExamFlow  — one-time placement exam
+   States: intro → loading → questions → evaluating → results
+════════════════════════════════════════════════════════════════ */
+function ExamFlow({ user, onComplete }) {
+  const [state, setState]     = useState('intro');    // intro|loading|questions|evaluating|results
+  const [questions, setQs]    = useState([]);
+  const [qIdx, setQIdx]       = useState(0);
+  const [answers, setAnswers] = useState([]);         // [{topic, was_correct}]
+  const [profile, setProfile] = useState(null);
+  const [error, setError]     = useState('');
+
+  const startExam = async () => {
+    setState('loading');
+    setError('');
+    try {
+      const data = await apiExamGenerate();
+      setQs(data.questions.map((c, i) => normalizeCard(c, `exam-${i}`)));
+      setState('questions');
+    } catch (err) {
+      setError(err.message);
+      setState('intro');
+    }
+  };
+
+  const skipExam = async () => {
+    await apiExamSkip(user);
+    onComplete({ level: 'beginner', exam_completed: 1 });
+  };
+
+  const handleAnswer = async (wasCorrect) => {
+    const card       = questions[qIdx];
+    const newAnswers = [...answers, { topic: card.topic, was_correct: wasCorrect }];
+    setAnswers(newAnswers);
+
+    if (qIdx + 1 >= questions.length) {
+      // All done — batch evaluate
+      setState('evaluating');
+      try {
+        const result = await apiExamEvaluate(user, newAnswers);
+        setProfile(result);
+        setState('results');
+      } catch (err) {
+        setError(err.message);
+        setState('results');
+      }
+    } else {
+      setQIdx(i => i + 1);
+    }
+  };
+
+  const card = questions[qIdx] ?? null;
+
+  // ── Intro screen ─────────────────────────────────────────────
+  if (state === 'intro') return (
+    <div className="exam-intro slide-up">
+      <div className="exam-intro-icon">🎯</div>
+      <h2 className="exam-intro-title">Placement Exam</h2>
+      <p className="exam-intro-desc">
+        12 quick questions across all topics. Takes about 3 minutes.
+        We'll use your results to tailor every card to your exact level — no credits wasted re-evaluating you later.
+      </p>
+      {error && <p style={{ color:'var(--red)', fontSize:13, marginBottom:12 }}>⚠️ {error}</p>}
+      <button className="btn-exam-start" onClick={startExam}>Start Placement Exam →</button>
+      <button className="btn-exam-skip"  onClick={skipExam}>I'm a complete beginner, skip this</button>
+    </div>
+  );
+
+  // ── Loading screen ───────────────────────────────────────────
+  if (state === 'loading') return (
+    <div className="exam-intro slide-up">
+      <div className="exam-intro-icon" style={{ animation:'sway 2s ease-in-out infinite' }}>📝</div>
+      <h2 className="exam-intro-title">Building your exam…</h2>
+      <p className="exam-intro-desc">Claude is generating 12 questions tailored to the Mastering Arabic Book 1 curriculum.</p>
+    </div>
+  );
+
+  // ── Evaluating screen ────────────────────────────────────────
+  if (state === 'evaluating') return (
+    <div className="exam-intro slide-up">
+      <div className="exam-intro-icon" style={{ animation:'sway 2s ease-in-out infinite' }}>🔍</div>
+      <h2 className="exam-intro-title">Analysing your results…</h2>
+      <p className="exam-intro-desc">Computing your knowledge profile. This only happens once.</p>
+    </div>
+  );
+
+  // ── Results screen ───────────────────────────────────────────
+  if (state === 'results') {
+    const scores   = profile?.topic_scores ?? {};
+    const entries  = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    const levelCls = (profile?.level ?? 'beginner').replace(/\s+/g, '-').toLowerCase();
+    const correct  = answers.filter(a => a.was_correct).length;
+
+    const barColor = (pct) => {
+      if (pct >= 70) return 'var(--green)';
+      if (pct >= 40) return 'var(--gold)';
+      return 'var(--red)';
+    };
+
+    return (
+      <div className="exam-results slide-up">
+        <span className={`level-badge ${levelCls}`}>{profile?.level ?? 'beginner'}</span>
+        <h2 className="results-title">{correct} / {answers.length} correct</h2>
+        <p className="results-summary">{profile?.summary ?? 'Your profile has been saved. Cards will now be tailored to your level.'}</p>
+
+        {entries.length > 0 && (
+          <div className="topic-list">
+            {entries.map(([topic, pct]) => (
+              <div key={topic} className="topic-row">
+                <span className="topic-name">{topic}</span>
+                <div className="topic-bar-bg">
+                  <div className="topic-bar-fill"
+                    style={{ width:`${pct}%`, background: barColor(pct) }} />
+                </div>
+                <span className="topic-pct">{pct}%</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button className="btn-exam-start" style={{ maxWidth:'100%' }}
+          onClick={() => onComplete({ ...profile, exam_completed: 1 })}>
+          Start Learning →
+        </button>
+      </div>
+    );
+  }
+
+  // ── Questions ────────────────────────────────────────────────
+  return (
+    <>
+      <div className="exam-banner">
+        <div className="exam-banner-label">Placement Exam</div>
+        <div className="exam-banner-prog">{qIdx + 1} / {questions.length}</div>
+      </div>
+      <div className="progress-wrap">
+        <div className="progress-track">
+          <div className="progress-fill" style={{ width:`${(qIdx / questions.length) * 100}%` }} />
+        </div>
+      </div>
+      <div className="main">
+        {card?.type === 'swipe'           && <SwipeCard key={card.id} card={card} onAnswer={handleAnswer} />}
+        {card?.type === 'multiple_choice' && <MCCard    key={card.id} card={card} onAnswer={handleAnswer} />}
+        {card?.type === 'type_answer'     && <TypeCard  key={card.id} card={card} onAnswer={handleAnswer} localOnly />}
+      </div>
+    </>
   );
 }
 
@@ -636,7 +842,7 @@ function MCCard({ card, onAnswer }) {
 /* ════════════════════════════════════════════════════════════════
    TypeCard
 ════════════════════════════════════════════════════════════════ */
-function TypeCard({ card, onAnswer }) {
+function TypeCard({ card, onAnswer, localOnly = false }) {
   const [value, setValue]       = useState('');
   const [evaling, setEvaling]   = useState(false);
   const [done, setDone]         = useState(false);
@@ -649,6 +855,17 @@ function TypeCard({ card, onAnswer }) {
   const submit = async () => {
     if (!value.trim() || done || evaling) return;
     setEvaling(true); setShowKb(false);
+
+    if (localOnly) {
+      // Exam mode — local comparison only, no API call
+      const norm = s => s.trim().replace(/[ً-ٟ]/g,'');
+      const ok   = norm(value) === norm(card.expectedAnswer);
+      setCorrect(ok);
+      setFeedback(ok ? 'Correct!' : `Expected: ${card.expectedAnswer}`);
+      setEvaling(false); setDone(true);
+      return;
+    }
+
     const res = await apiEvaluate(card.question_en, card.expectedAnswer, value.trim());
     if (res) { setCorrect(res.correct); setFeedback(res.feedback); }
     else {
@@ -876,17 +1093,49 @@ function HomePage({ user, streak, onStreakUpdate }) {
 /* ════════════════════════════════════════════════════════════════
    JourneyPage
 ════════════════════════════════════════════════════════════════ */
-function JourneyPage({ user, streak }) {
-  const spots = getWS(user);
+function JourneyPage({ user, streak, knowledge }) {
+  const spots  = getWS(user);
+  let scores   = {};
+  try { scores = JSON.parse(knowledge?.topic_scores || '{}'); } catch {}
+  const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const levelCls = (knowledge?.level ?? 'beginner').replace(/\s+/g,'-').toLowerCase();
+
+  const barColor = pct => pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--gold)' : 'var(--red)';
+
   return (
     <div className="journey slide-up">
       <div className="journey-icon">🗺️</div>
       <h2 className="journey-title">{user}'s Journey</h2>
-      <p className="journey-desc">Progress tracking, learning path, and achievements coming soon.</p>
+
+      {knowledge?.level && (
+        <span className={`level-badge ${levelCls}`} style={{ marginBottom:16 }}>
+          {knowledge.level} · {Math.round(knowledge.overall_score ?? 0)}/100
+        </span>
+      )}
+      {knowledge?.summary && (
+        <p className="journey-desc" style={{ marginBottom:20 }}>{knowledge.summary}</p>
+      )}
+
       <div style={{ width:'100%' }}>
-        <div className="info-row"><span className="info-key">🔥 Current Streak</span><span className="info-val">{streak.current_streak??0} days</span></div>
-        <div className="info-row"><span className="info-key">📚 Cards Today</span><span className="info-val">{streak.cards_today??0} / {streak.daily_goal??5}</span></div>
-        <div className="info-row"><span className="info-key">🏆 Total Cards</span><span className="info-val">{streak.total_cards_ever??0}</span></div>
+        <div className="info-row"><span className="info-key">🔥 Streak</span><span className="info-val">{streak.current_streak??0} days</span></div>
+        <div className="info-row"><span className="info-key">📚 Today</span><span className="info-val">{streak.cards_today??0} / {streak.daily_goal??5}</span></div>
+        <div className="info-row"><span className="info-key">🏆 Total</span><span className="info-val">{streak.total_cards_ever??0} cards</span></div>
+
+        {entries.length > 0 && (
+          <div style={{ background:'var(--white)', borderRadius:13, padding:'16px 18px', boxShadow:'var(--shadow)', marginBottom:10, marginTop:2 }}>
+            <p style={{ fontSize:12, fontWeight:800, color:'rgba(27,42,74,.5)', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:12 }}>Topic Mastery</p>
+            {entries.map(([topic, pct]) => (
+              <div key={topic} className="topic-row">
+                <span className="topic-name">{topic}</span>
+                <div className="topic-bar-bg">
+                  <div className="topic-bar-fill" style={{ width:`${pct}%`, background: barColor(pct) }} />
+                </div>
+                <span className="topic-pct">{pct}%</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {spots.length > 0 && (
           <div className="info-row" style={{ flexDirection:'column', alignItems:'flex-start', gap:8 }}>
             <span className="info-key">🎯 Needs Practice</span>
@@ -904,16 +1153,21 @@ function JourneyPage({ user, streak }) {
    App
 ════════════════════════════════════════════════════════════════ */
 function App() {
-  const [route,  setRoute]  = useState(window.location.hash || '#/');
-  const [user,   setUser]   = useState(loadCurUser);
-  const [users,  setUsers]  = useState(loadUsers);
-  const [streak, setStreak] = useState({ current_streak:0, cards_today:0, daily_goal:5, total_cards_ever:0 });
+  const [route,     setRoute]     = useState(window.location.hash || '#/');
+  const [user,      setUser]      = useState(loadCurUser);
+  const [users,     setUsers]     = useState(loadUsers);
+  const [streak,    setStreak]    = useState({ current_streak:0, cards_today:0, daily_goal:5, total_cards_ever:0 });
+  const [knowledge, setKnowledge] = useState(null); // null = loading
 
+  // Fetch streak + knowledge whenever user changes
   useEffect(() => {
-    apiStreak(user).then(s => {
-      if (!s) return;
-      setStreak(s);
-      if (Array.isArray(s.users)) setUsers(prev => [...new Set([...prev,...s.users])]);
+    setKnowledge(null);
+    Promise.all([apiStreak(user), apiKnowledge(user)]).then(([s, k]) => {
+      if (s) {
+        setStreak(s);
+        if (Array.isArray(s.users)) setUsers(prev => [...new Set([...prev,...s.users])]);
+      }
+      setKnowledge(k ?? { exam_completed: 0 });
     });
   }, [user]);
 
@@ -949,8 +1203,19 @@ function App() {
         <button className={`tab-btn ${route==='#/journey' ? 'active':''}`} onClick={() => navigate('#/journey')}>Journey</button>
       </div>
 
-      {route === '#/'        && <HomePage    key={user} user={user} streak={streak} onStreakUpdate={setStreak} />}
-      {route === '#/journey' && <JourneyPage key={user} user={user} streak={streak} />}
+      {/* Show exam first if not yet completed; null = still loading */}
+      {knowledge === null && (
+        <div className="main" style={{ justifyContent:'center' }}>
+          <CardSkeleton message="Loading your profile…" />
+        </div>
+      )}
+      {knowledge !== null && !knowledge.exam_completed && (
+        <ExamFlow user={user} onComplete={k => setKnowledge({ ...knowledge, ...k })} />
+      )}
+      {knowledge !== null && knowledge.exam_completed && route === '#/' &&
+        <HomePage    key={user} user={user} streak={streak} onStreakUpdate={setStreak} />}
+      {knowledge !== null && knowledge.exam_completed && route === '#/journey' &&
+        <JourneyPage key={user} user={user} streak={streak} knowledge={knowledge} />}
     </>
   );
 }
