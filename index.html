@@ -221,8 +221,38 @@
 const { useState, useEffect, useRef, useCallback } = React;
 
 /* ── Constants ────────────────────────────────────────────────── */
-const BATCH_SIZE   = 5;   // cards shown per session
-const CARD_BANK    = 15;  // cards generated per API call (3 free sessions)
+const BATCH_SIZE   = 5;   // cards shown per round
+const CARD_BANK    = 15;  // cards generated per API call (3 free rounds)
+
+/* ── All available suggestion topics ─────────────────────────── */
+const ALL_TOPICS = [
+  'Months of the year', 'Numbers 1–20', 'Numbers 20–100', 'Colors',
+  'Greetings & introductions', 'Family members', 'Question words',
+  'Present tense verbs', 'Days of the week', 'Definite article ال',
+  'Noun gender', 'Simple sentences', 'Prepositions', 'Food vocabulary',
+  'Places vocabulary', 'Plurals', 'Adjective agreement',
+  'Genitive construction', 'Common phrases', 'Alphabet & script',
+];
+
+/* ── Daily personalized chips ─────────────────────────────────── */
+// Weak spots shown first; rest shuffled with a date seed so they
+// rotate daily but are stable within a day.
+function getDailyChips(user) {
+  const seed = todayStr().split('-').reduce((a, b, i) => a + parseInt(b) * (i + 1) * 31, 0);
+  const rng  = n => ((seed * 1103515245 + n * 12345) >>> 0) / 0xffffffff;
+
+  const weak = getWS(user)
+    .map(w => ALL_TOPICS.find(t => t.toLowerCase().includes(w.toLowerCase())) || null)
+    .filter(Boolean)
+    .slice(0, 4);
+
+  const rest = ALL_TOPICS
+    .filter(t => !weak.includes(t))
+    .sort((a, b) => rng(a.charCodeAt(0) + a.length) - rng(b.charCodeAt(0) + b.length))
+    .slice(0, 9 - weak.length);
+
+  return [...weak, ...rest];
+}
 const SUGGESTIONS  = [
   'Months of the year', 'Numbers 1–20', 'Colors',
   'Greetings', 'Family members', 'Question words',
@@ -392,7 +422,7 @@ function UserDropdown({ user, users, onSwitch, onAdd }) {
 /* ════════════════════════════════════════════════════════════════
    LearningGoalBar
 ════════════════════════════════════════════════════════════════ */
-function LearningGoalBar({ currentGoal, onSubmit, disabled }) {
+function LearningGoalBar({ currentGoal, chips, onSubmit, disabled }) {
   const [value, setValue]     = useState('');
   const [focused, setFocused] = useState(false);
 
@@ -417,10 +447,10 @@ function LearningGoalBar({ currentGoal, onSubmit, disabled }) {
         <button className="goal-submit" onClick={() => submit()} disabled={!value.trim() || disabled}>→</button>
       </div>
 
-      {/* Suggestion chips — show on focus or when no goal yet */}
+      {/* Chips — show on focus or when no active goal */}
       {(focused || !currentGoal) && (
         <div className="goal-chips fade-in">
-          {SUGGESTIONS.map(s => (
+          {chips.map(s => (
             <button key={s}
               className={`chip${currentGoal === s ? ' active-goal' : ''}`}
               onMouseDown={e => { e.preventDefault(); submit(s); }}>
@@ -430,7 +460,6 @@ function LearningGoalBar({ currentGoal, onSubmit, disabled }) {
         </div>
       )}
 
-      {/* Show active goal when chips are hidden */}
       {currentGoal && !focused && (
         <p style={{ fontSize:12, color:'rgba(27,42,74,.45)', marginTop:7, fontWeight:600 }}>
           Focused on: <span style={{ color:'var(--gold)' }}>{currentGoal}</span>
@@ -695,12 +724,14 @@ function CompletionScreen({ streak, correctCount, total, onPracticeMore }) {
 ════════════════════════════════════════════════════════════════ */
 function HomePage({ user, streak, onStreakUpdate }) {
   const [goal, setGoal]         = useState(() => loadGoal(user));
-  const [cards, setCards]       = useState(null);  // current batch of 5
-  const [cardIdx, setCardIdx]   = useState(0);     // position within batch
+  const [cards, setCards]       = useState(null);
+  const [cardIdx, setCardIdx]   = useState(0);
   const [loading, setLoading]   = useState(false);
   const [apiError, setApiError] = useState('');
   const [correctCt, setCorrect] = useState(0);
   const [done, setDone]         = useState(false);
+  // Computed once per day, personalized to this user's weak spots
+  const dailyChips = useRef(getDailyChips(user)).current;
 
   // Pick the right batch of 5 from the full bank of 15
   const getBatch = (bank, batchNum) => {
@@ -808,20 +839,24 @@ function HomePage({ user, streak, onStreakUpdate }) {
 
   if (done) return (
     <>
-      <LearningGoalBar currentGoal={goal} onSubmit={handleGoalSubmit} disabled={loading} />
+      <LearningGoalBar currentGoal={goal} chips={dailyChips} onSubmit={handleGoalSubmit} disabled={loading} />
       <CompletionScreen streak={streak} correctCount={correctCt} total={BATCH_SIZE}
         onPracticeMore={() => { const g = ''; setGoal(g); saveGoal(user, g); startSession(g, true); }} />
     </>
   );
 
+  // Daily progress: use streak.cards_today (persists across goal switches, updated via apiRecord)
+  const todayDone  = streak.cards_today ?? 0;
+  const todayGoal  = streak.daily_goal  ?? 5;
+
   return (
     <>
-      <LearningGoalBar currentGoal={goal} onSubmit={handleGoalSubmit} disabled={loading} />
+      <LearningGoalBar currentGoal={goal} chips={dailyChips} onSubmit={handleGoalSubmit} disabled={loading} />
       <div className="progress-wrap">
         <div className="progress-track">
-          <div className="progress-fill" style={{ width:`${(cardIdx/BATCH_SIZE)*100}%` }} />
+          <div className="progress-fill" style={{ width:`${Math.min(100, (todayDone / Math.max(todayGoal, todayDone || 1)) * 100)}%` }} />
         </div>
-        <p className="progress-label">{cardIdx} / {BATCH_SIZE} in this round</p>
+        <p className="progress-label">{todayDone} cards today · {cardIdx} / {BATCH_SIZE} this round</p>
       </div>
       {apiError && (
         <div style={{ margin:'10px 18px 0', padding:'10px 14px', background:'rgba(196,96,58,.1)', border:'1.5px solid rgba(196,96,58,.4)', borderRadius:10, fontSize:12, color:'var(--red)', fontWeight:600 }}>
