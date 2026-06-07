@@ -119,9 +119,9 @@ const SESSION_SYSTEM = `You are a warm, encouraging Arabic tutor. Your student i
 17. Plurals: sound masculine plural (معلمون/معلمين), sound feminine plural (معلمات), broken plurals (كتاب→كتب، بيت→بيوت، رجل→رجال)
 
 ## Your Task
-Generate exactly 5 practice cards as a valid JSON array. Mix the three card types across the 5 cards. Vary difficulty (2 easy, 2 medium, 1 challenging).
+Generate exactly 15 practice cards as a valid JSON array. Mix the three card types evenly (5 swipe, 5 multiple_choice, 5 type_answer). Vary difficulty gradually — cards 1–5 easy, 6–10 medium, 11–15 challenging.
 
-## Output Format — return ONLY this JSON, no other text:
+## Output Format — return ONLY this JSON array, no other text:
 [
   {
     "type": "swipe" | "multiple_choice" | "type_answer",
@@ -141,8 +141,8 @@ Generate exactly 5 practice cards as a valid JSON array. Mix the three card type
 
 ## Quality Standards
 - Include question_ar whenever the card involves reading or writing Arabic script
-- Never repeat the same question twice within one set of 5
-- Vary topics across the 5 cards even when focusing on a theme
+- Never repeat the same question twice within the 15 cards
+- Vary topics across the full set even when focusing on a theme
 - Explanations should teach — briefly explain why, not just restate the answer`;
 
 const EVAL_SYSTEM = `You are an Arabic tutor evaluating a student's typed answer. Be generous: accept answers that are semantically correct even with minor spelling variants, missing or extra vowel marks (harakat), or slight transliteration differences. Respond ONLY with valid JSON: { "correct": boolean, "feedback": string }. Keep feedback to 1 short sentence — encouraging if correct, gently corrective if wrong (include the right answer).`;
@@ -227,7 +227,7 @@ export async function onRequest(context) {
       const raw   = await callClaude(env.ANTHROPIC_API_KEY, {
         system:   SESSION_SYSTEM,
         userMsg:  parts.join('\n'),
-        maxTokens: 2500,
+        maxTokens: 6000,
       });
 
       const cards = parseClaudeJSON(raw);

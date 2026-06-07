@@ -221,7 +221,8 @@
 const { useState, useEffect, useRef, useCallback } = React;
 
 /* ── Constants ────────────────────────────────────────────────── */
-const DAILY_GOAL   = 5;
+const BATCH_SIZE   = 5;   // cards shown per session
+const CARD_BANK    = 15;  // cards generated per API call (3 free sessions)
 const SUGGESTIONS  = [
   'Months of the year', 'Numbers 1–20', 'Colors',
   'Greetings', 'Family members', 'Question words',
@@ -694,12 +695,18 @@ function CompletionScreen({ streak, correctCount, total, onPracticeMore }) {
 ════════════════════════════════════════════════════════════════ */
 function HomePage({ user, streak, onStreakUpdate }) {
   const [goal, setGoal]         = useState(() => loadGoal(user));
-  const [cards, setCards]       = useState(null);
-  const [cardIdx, setCardIdx]   = useState(0);
+  const [cards, setCards]       = useState(null);  // current batch of 5
+  const [cardIdx, setCardIdx]   = useState(0);     // position within batch
   const [loading, setLoading]   = useState(false);
   const [apiError, setApiError] = useState('');
   const [correctCt, setCorrect] = useState(0);
   const [done, setDone]         = useState(false);
+
+  // Pick the right batch of 5 from the full bank of 15
+  const getBatch = (bank, batchNum) => {
+    const start = (batchNum * BATCH_SIZE) % bank.length;
+    return bank.slice(start, start + BATCH_SIZE);
+  };
 
   // Start or resume a session
   const startSession = useCallback(async (g, forceNew = false) => {
@@ -707,31 +714,38 @@ function HomePage({ user, streak, onStreakUpdate }) {
     setCards(null);
 
     if (!forceNew) {
-      // Check for cached session (resume on refresh)
+      // Resume saved session
       const session = loadSession(user, g);
-      const cached  = loadCards(user, g);
-      if (cached && session) {
-        const normalized = cached.map((c,i) => normalizeCard(c, `${user}-${i}`));
+      const bank    = loadCards(user, g); // full 15-card bank
+      if (bank && session) {
         if (session.done) {
-          setCards(normalized); setCardIdx(DAILY_GOAL);
-          setCorrect(session.correctCount ?? 0); setDone(true);
+          // All 15 done today — show completion
+          setCards(getBatch(bank, 0));
+          setCardIdx(BATCH_SIZE);
+          setCorrect(session.correctCount ?? 0);
+          setDone(true);
           setLoading(false); return;
         }
-        setCards(normalized); setCardIdx(session.cardIdx ?? 0);
-        setCorrect(session.correctCount ?? 0); setDone(false);
+        const batchNum = Math.floor((session.cardIdx) / BATCH_SIZE);
+        const batch    = getBatch(bank, batchNum);
+        setCards(batch.map((c,i) => normalizeCard(c, `${user}-b${batchNum}-${i}`)));
+        setCardIdx(session.cardIdx % BATCH_SIZE);
+        setCorrect(session.correctCount ?? 0);
+        setDone(false);
         setLoading(false); return;
       }
     }
 
-    // Fresh session — one Claude call for all 5 cards
+    // Fresh session — one Claude call generates the full 15-card bank
     setCardIdx(0); setCorrect(0); setDone(false); setApiError('');
     try {
       const res = await apiSession(user, g, getWS(user));
-      const rawCards = res?.cards;
-      if (rawCards?.length) {
-        saveCards(user, g, rawCards);
-        setCards(rawCards.map((c,i) => normalizeCard(c, `${user}-${i}-${Date.now()}`)));
-        saveSession(user, g, { cardIdx: 0, correctCount: 0, done: false });
+      const bank = res?.cards;
+      if (bank?.length) {
+        saveCards(user, g, bank);
+        const batch = getBatch(bank, 0);
+        setCards(batch.map((c,i) => normalizeCard(c, `${user}-b0-${i}-${Date.now()}`)));
+        saveSession(user, g, { cardIdx: 0, correctCount: 0, done: false, bankSize: bank.length });
       } else {
         setApiError('Claude returned no cards. Check Cloudflare Functions logs.');
         setCards(FALLBACK);
@@ -766,12 +780,28 @@ function HomePage({ user, streak, onStreakUpdate }) {
     const res = await apiRecord(user, cards[cardIdx].type, cards[cardIdx].topic, cards[cardIdx].question_en||'', wasCorrect);
     if (res?.streak) onStreakUpdate(res.streak);
 
-    const next   = cardIdx + 1;
-    const isDone = next >= DAILY_GOAL;
-    saveSession(user, goal, { cardIdx: next, correctCount: newCorrect, done: isDone });
+    const nextInBatch  = cardIdx + 1;
+    const bank         = loadCards(user, goal) ?? [];
+    const session      = loadSession(user, goal) ?? {};
+    const globalIdx    = (session.cardIdx ?? 0) + 1; // position in the full 15-card bank
+    const batchDone    = nextInBatch >= BATCH_SIZE;
+    const allBankDone  = globalIdx >= bank.length;
 
-    if (isDone) { setDone(true); setCardIdx(next); }
-    else setCardIdx(next);
+    saveSession(user, goal, { cardIdx: globalIdx, correctCount: newCorrect, done: allBankDone });
+
+    if (batchDone && !allBankDone) {
+      // Advance to next batch of 5 — still free, cards already in localStorage
+      const nextBatch = Math.floor(globalIdx / BATCH_SIZE);
+      const batch     = getBatch(bank, nextBatch);
+      setCards(batch.map((c,i) => normalizeCard(c, `${user}-b${nextBatch}-${i}-${Date.now()}`)));
+      setCardIdx(0);
+      setCorrect(0);
+      setDone(false);
+    } else if (allBankDone) {
+      setDone(true); setCardIdx(nextInBatch);
+    } else {
+      setCardIdx(nextInBatch);
+    }
   };
 
   const card = cards?.[cardIdx] ?? null;
@@ -779,7 +809,7 @@ function HomePage({ user, streak, onStreakUpdate }) {
   if (done) return (
     <>
       <LearningGoalBar currentGoal={goal} onSubmit={handleGoalSubmit} disabled={loading} />
-      <CompletionScreen streak={streak} correctCount={correctCt} total={DAILY_GOAL}
+      <CompletionScreen streak={streak} correctCount={correctCt} total={BATCH_SIZE}
         onPracticeMore={() => { const g = ''; setGoal(g); saveGoal(user, g); startSession(g, true); }} />
     </>
   );
@@ -789,9 +819,9 @@ function HomePage({ user, streak, onStreakUpdate }) {
       <LearningGoalBar currentGoal={goal} onSubmit={handleGoalSubmit} disabled={loading} />
       <div className="progress-wrap">
         <div className="progress-track">
-          <div className="progress-fill" style={{ width:`${(cardIdx/DAILY_GOAL)*100}%` }} />
+          <div className="progress-fill" style={{ width:`${(cardIdx/BATCH_SIZE)*100}%` }} />
         </div>
-        <p className="progress-label">{cardIdx} / {DAILY_GOAL} cards today</p>
+        <p className="progress-label">{cardIdx} / {BATCH_SIZE} in this round</p>
       </div>
       {apiError && (
         <div style={{ margin:'10px 18px 0', padding:'10px 14px', background:'rgba(196,96,58,.1)', border:'1.5px solid rgba(196,96,58,.4)', borderRadius:10, fontSize:12, color:'var(--red)', fontWeight:600 }}>
