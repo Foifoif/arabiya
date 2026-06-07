@@ -2,11 +2,5 @@ name = "arabiya"
 compatibility_date = "2024-11-01"
 pages_build_output_dir = "."
 
-[[d1_databases]]
-binding = "DB"
-database_name = "arabiya-db"
-database_id = "fe2b7fc5-af20-4843-814f-6ee3271de529"
-# To get your database_id:
-# 1. Run: wrangler d1 create arabiya-db
-# 2. Copy the database_id from the output and paste it above
-# 3. Run: wrangler d1 execute arabiya-db --file=./schema.sql
+# D1 binding is configured in the Cloudflare Pages dashboard:
+# Settings → Functions → D1 database bindings → DB → arabiya-db
