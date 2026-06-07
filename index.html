@@ -41,38 +41,44 @@
       display: flex;
       flex-direction: column;
       background: rgba(250,247,242,.97);
-      position: relative;
       overflow-x: hidden;
     }
 
-    /* ── Header ─────────────────────────────────────────────── */
+    /* ── Header ──────────────────────────────────────────────── */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 18px 11px;
+      padding: 11px 16px 10px;
       background: rgba(250,247,242,.98);
       border-bottom: 1.5px solid rgba(201,150,58,.14);
       position: sticky;
       top: 0;
       z-index: 100;
       backdrop-filter: blur(6px);
+      gap: 8px;
     }
     .logo {
-      font-size: 19px;
+      font-size: 17px;
       font-weight: 800;
       color: var(--navy);
       letter-spacing: -.3px;
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
+      flex-shrink: 0;
     }
     .logo-img {
-      height: 40px;
-      width: 40px;
+      height: 38px;
+      width: 38px;
       object-fit: cover;
-      border-radius: 10px;
+      border-radius: 9px;
       border: 2px solid #000;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 7px;
       flex-shrink: 0;
     }
     .streak-pill {
@@ -81,11 +87,74 @@
       gap: 4px;
       background: var(--navy);
       color: #fff;
-      padding: 5px 13px;
+      padding: 5px 11px;
       border-radius: 20px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
     }
+
+    /* ── User selector ───────────────────────────────────────── */
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(201,150,58,.13);
+      color: var(--navy);
+      padding: 5px 10px 5px 8px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      border: 1.5px solid rgba(201,150,58,.3);
+      white-space: nowrap;
+    }
+    .user-pill select {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px; /* prevents iOS zoom */
+    }
+    .user-chevron { font-size: 9px; opacity: .6; }
+
+    /* ── Add-user modal ──────────────────────────────────────── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(27,42,74,.45);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal {
+      background: var(--white);
+      border-radius: 18px;
+      padding: 28px 24px 22px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: var(--shadow);
+    }
+    .modal h3 { font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 16px; }
+    .modal input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 2px solid rgba(27,42,74,.15);
+      font-family: var(--ui);
+      font-size: 15px;
+      color: var(--navy);
+      outline: none;
+      margin-bottom: 14px;
+    }
+    .modal input:focus { border-color: var(--gold); }
+    .modal-btns { display: flex; gap: 10px; }
+    .modal-btns button { flex: 1; padding: 11px; border-radius: 10px; border: none; font-family: var(--ui); font-size: 14px; font-weight: 800; cursor: pointer; }
+    .modal-btns .btn-confirm { background: var(--gold); color: #fff; }
+    .modal-btns .btn-cancel  { background: rgba(27,42,74,.08); color: var(--navy); }
 
     /* ── Top tab nav ─────────────────────────────────────────── */
     .top-tabs {
@@ -93,7 +162,7 @@
       background: var(--white);
       border-bottom: 1.5px solid rgba(27,42,74,.09);
       position: sticky;
-      top: 65px;
+      top: 61px;
       z-index: 90;
     }
     .tab-btn {
@@ -112,10 +181,7 @@
       letter-spacing: .6px;
       transition: color .13s, border-color .13s;
     }
-    .tab-btn.active {
-      color: var(--gold);
-      border-bottom-color: var(--gold);
-    }
+    .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
 
     /* ── Progress ────────────────────────────────────────────── */
     .progress-wrap { padding: 14px 20px 0; }
@@ -123,10 +189,10 @@
     .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #E8B45A); border-radius: 4px; transition: width .45s cubic-bezier(.4,0,.2,1); }
     .progress-label { font-size: 11.5px; color: var(--navy); opacity: .55; text-align: center; margin-top: 5px; font-weight: 700; letter-spacing: .3px; }
 
-    /* ── Main area ───────────────────────────────────────────── */
+    /* ── Main ────────────────────────────────────────────────── */
     .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 18px 32px; min-height: 0; }
 
-    /* ── Card shell ──────────────────────────────────────────── */
+    /* ── Card ────────────────────────────────────────────────── */
     .card { width: 100%; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 26px 22px 22px; position: relative; will-change: transform; touch-action: pan-y; }
     .card-chip { display: inline-flex; align-items: center; gap: 5px; background: rgba(27,42,74,.06); color: var(--navy); padding: 4px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 800; margin-bottom: 20px; letter-spacing: .3px; text-transform: uppercase; }
 
@@ -155,7 +221,7 @@
     .mc-opt.correct { background: rgba(107,143,113,.12); border-color: var(--green); color: var(--green); }
     .mc-opt.wrong   { background: rgba(196,96,58,.1);    border-color: var(--red);   color: var(--red);   }
 
-    /* ── Type input ──────────────────────────────────────────── */
+    /* ── Type ────────────────────────────────────────────────── */
     .type-input { width: 100%; padding: 13px 15px; border-radius: 12px; border: 2px solid rgba(27,42,74,.14); font-family: var(--arabic); font-size: 26px; direction: rtl; text-align: right; color: var(--navy); background: var(--white); outline: none; transition: border-color .18s; margin-bottom: 12px; }
     .type-input:focus { border-color: var(--gold); }
     .type-input:disabled { background: rgba(27,42,74,.03); }
@@ -165,7 +231,7 @@
     .btn-submit:hover:not(:disabled) { opacity: .88; }
     .btn-submit:active { transform: scale(.97); }
     .btn-submit:disabled { opacity: .4; cursor: default; }
-    .btn-next { width: 100%; padding: 14px; background: var(--gold); color: #fff; border: none; border-radius: 12px; font-family: var(--ui); font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 14px; transition: opacity .13s, transform .13s; letter-spacing: .3px; }
+    .btn-next { width: 100%; padding: 14px; background: var(--gold); color: #fff; border: none; border-radius: 12px; font-family: var(--ui); font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 14px; transition: opacity .13s, transform .13s; }
     .btn-next:hover { opacity: .9; }
     .btn-next:active { transform: scale(.97); }
 
@@ -177,14 +243,8 @@
     .reveal-text { font-size: 14px; color: var(--navy); line-height: 1.55; }
     .reveal-answer { font-family: var(--arabic); font-size: 26px; direction: rtl; color: var(--navy); display: inline-block; margin: 4px 0 2px; }
 
-    /* ── Arabic keyboard — inline below the card ─────────────── */
-    .keyboard {
-      width: 100%;
-      background: rgba(22,34,60,.97);
-      padding: 10px 6px 12px;
-      border-radius: 14px;
-      margin-top: 10px;
-    }
+    /* ── Keyboard (inline below card) ────────────────────────── */
+    .keyboard { width: 100%; background: rgba(22,34,60,.97); padding: 10px 6px 12px; border-radius: 14px; margin-top: 10px; }
     .kb-row { display: flex; justify-content: center; gap: 4px; margin-bottom: 5px; direction: rtl; }
     .key { background: rgba(255,255,255,.13); color: #fff; border: none; border-radius: 6px; padding: 9px 5px 8px; font-family: var(--arabic); font-size: 17px; cursor: pointer; flex: 1; max-width: 33px; text-align: center; transition: background .08s; line-height: 1; }
     .key:active { background: rgba(255,255,255,.28); }
@@ -240,7 +300,7 @@ const TOPIC_EMOJI = {
 };
 const topicEmoji = t => TOPIC_EMOJI[(t||'').toLowerCase()] ?? '📖';
 
-/* ── Normalize raw Claude card ────────────────────────────────── */
+/* ── Normalize card ───────────────────────────────────────────── */
 function normalizeCard(raw, id) {
   const base = {
     id, type: raw.type, topic: raw.topic ?? 'Arabic',
@@ -259,13 +319,13 @@ function normalizeCard(raw, id) {
 /* ── Fallback cards ───────────────────────────────────────────── */
 const FALLBACK = [
   normalizeCard({ type:'swipe',           topic:'Vocabulary',  question_en:'كَلْب means "dog"',                question_ar:'كَلْب',    answer:'true',       explanation_en:'كَلْب (kalb) = dog. Plural: كِلاب.' }, 'f1'),
-  normalizeCard({ type:'multiple_choice', topic:'Greetings',   question_en:'How do you say "Good morning"?',                          answer:'صباح الخير', options:['مرحبا','صباح الخير','شكراً','مساء النور'], explanation_en:'صباح الخير (ṣabāḥ al-khayr). مرحبا = hello.' }, 'f2'),
+  normalizeCard({ type:'multiple_choice', topic:'Greetings',   question_en:'How do you say "Good morning"?',                          answer:'صباح الخير', options:['مرحبا','صباح الخير','شكراً','مساء النور'], explanation_en:'صباح الخير = good morning. مرحبا = hello.' }, 'f2'),
   normalizeCard({ type:'type_answer',     topic:'Numbers',     question_en:'Write the Arabic word for "three"',                       answer:'ثلاثة',      explanation_en:'ثلاثة (thalātha). واحد، اثنان، ثلاثة.' }, 'f3'),
   normalizeCard({ type:'swipe',           topic:'Grammar',     question_en:'Arabic nouns have masculine and feminine grammatical gender.', answer:'true',   explanation_en:'Yes — feminine nouns usually end in ـة (tā marbūṭa).' }, 'f4'),
   normalizeCard({ type:'multiple_choice', topic:'Colors',      question_en:'What does أَزْرَق (azraq) mean?', question_ar:'أَزْرَق', answer:'Blue',       options:['Red','Green','Blue','Yellow'], explanation_en:'أَزْرَق = blue. أَحْمَر = red, أَخْضَر = green.' }, 'f5'),
 ];
 
-/* ── Arabic keyboard ──────────────────────────────────────────── */
+/* ── Keyboard layout ──────────────────────────────────────────── */
 const KB = [
   ['ض','ص','ث','ق','ف','غ','ع','ه','خ','ح','ج','د'],
   ['ش','س','ي','ب','ل','ا','ت','ن','م','ك','ط'],
@@ -273,28 +333,46 @@ const KB = [
 ];
 
 /* ── Weak-spot cache ──────────────────────────────────────────── */
-const WS_KEY = 'arabiya_weak_spots';
-const getWS  = ()    => { try { return JSON.parse(localStorage.getItem(WS_KEY)||'[]'); } catch { return []; } };
-const setWS  = arr   => localStorage.setItem(WS_KEY, JSON.stringify(arr.slice(0,8)));
-const addWS  = topic => { const c=getWS(); if(!c.includes(topic)) setWS([topic,...c]); };
-const dropWS = topic => setWS(getWS().filter(t => t!==topic));
+const WS_KEY = u => `arabiya_weak_spots_${u}`;
+const getWS  = u    => { try { return JSON.parse(localStorage.getItem(WS_KEY(u))||'[]'); } catch { return []; } };
+const setWS  = (u,a) => localStorage.setItem(WS_KEY(u), JSON.stringify(a.slice(0,8)));
+const addWS  = (u,t) => { const c=getWS(u); if(!c.includes(t)) setWS(u,[t,...c]); };
+const dropWS = (u,t) => setWS(u, getWS(u).filter(x => x!==t));
+
+/* ── Session persistence ──────────────────────────────────────── */
+const todayStr   = () => new Date().toISOString().split('T')[0];
+const SESSION_KEY = u => `arabiya_session_${u}_${todayStr()}`;
+const loadSession = u => { try { return JSON.parse(localStorage.getItem(SESSION_KEY(u))||'null'); } catch { return null; } };
+const saveSession = (u, data) => localStorage.setItem(SESSION_KEY(u), JSON.stringify(data));
+
+/* ── User storage ─────────────────────────────────────────────── */
+const USERS_KEY   = 'arabiya_users';
+const CUR_KEY     = 'arabiya_current_user';
+const loadUsers   = () => { try { return JSON.parse(localStorage.getItem(USERS_KEY)||'["Ali"]'); } catch { return ['Ali']; } };
+const saveUsers   = arr => localStorage.setItem(USERS_KEY, JSON.stringify(arr));
+const loadCurUser = () => localStorage.getItem(CUR_KEY) || 'Ali';
+const saveCurUser = u   => localStorage.setItem(CUR_KEY, u);
 
 /* ── API helpers ──────────────────────────────────────────────── */
-async function apiStreak() {
+async function apiStreak(user) {
   try {
-    const r = await fetch('/api/streak');
+    const r = await fetch(`/api/streak?user=${encodeURIComponent(user)}`);
     if (!r.ok) return null;
     const d = await r.json();
-    if (Array.isArray(d.weak_spots)) setWS(d.weak_spots);
+    if (Array.isArray(d.weak_spots)) setWS(user, d.weak_spots);
+    if (Array.isArray(d.users)) {
+      const merged = [...new Set([...loadUsers(), ...d.users])];
+      saveUsers(merged);
+    }
     return d;
   } catch { return null; }
 }
 
-async function apiCard(weakSpots=[]) {
+async function apiCard(user, weakSpots=[]) {
   try {
     const r = await fetch('/api/card', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ weak_spots: weakSpots }),
+      body: JSON.stringify({ user, weak_spots: weakSpots }),
     });
     if (!r.ok) return null;
     const d = await r.json();
@@ -312,23 +390,89 @@ async function apiEvaluate(question, expected, user_answer) {
   } catch { return null; }
 }
 
-async function apiRecord(card_type, topic, question, was_correct) {
+async function apiRecord(user, card_type, topic, question, was_correct) {
   try {
     const r = await fetch('/api/record', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ card_type, topic, question, was_correct: was_correct?1:0 }),
+      body: JSON.stringify({ user, card_type, topic, question, was_correct: was_correct?1:0 }),
     });
     if (!r.ok) return null;
     const d = await r.json();
-    if (Array.isArray(d.streak?.weak_spots)) setWS(d.streak.weak_spots);
+    if (Array.isArray(d.streak?.weak_spots)) setWS(user, d.streak.weak_spots);
     return d;
   } catch { return null; }
+}
+
+async function apiAddUser(username) {
+  try {
+    await fetch('/api/users', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ username }),
+    });
+  } catch {}
 }
 
 const isTouch = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 /* ════════════════════════════════════════════════════════════════
-   ArabicKeyboard — renders inline below the card
+   UserDropdown
+════════════════════════════════════════════════════════════════ */
+function UserDropdown({ user, users, onSwitch, onAdd }) {
+  const [showModal, setShowModal] = useState(false);
+  const [newName, setNewName]     = useState('');
+  const inputRef = useRef(null);
+
+  const handleChange = e => {
+    if (e.target.value === '__add__') { setShowModal(true); }
+    else onSwitch(e.target.value);
+  };
+
+  const confirmAdd = () => {
+    const name = newName.trim();
+    if (!name) return;
+    onAdd(name);
+    setNewName('');
+    setShowModal(false);
+  };
+
+  useEffect(() => { if (showModal) setTimeout(() => inputRef.current?.focus(), 50); }, [showModal]);
+
+  return (
+    <>
+      <div className="user-pill">
+        <span>👤</span>
+        <span>{user}</span>
+        <span className="user-chevron">▾</span>
+        <select value={user} onChange={handleChange}>
+          {users.map(u => <option key={u} value={u}>{u}</option>)}
+          <option value="__add__">+ Add user</option>
+        </select>
+      </div>
+
+      {showModal && (
+        <div className="modal-backdrop" onClick={() => setShowModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h3>Add a learner</h3>
+            <input
+              ref={inputRef}
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              placeholder="Name (e.g. Sara)"
+              onKeyDown={e => e.key==='Enter' && confirmAdd()}
+            />
+            <div className="modal-btns">
+              <button className="btn-cancel"  onClick={() => setShowModal(false)}>Cancel</button>
+              <button className="btn-confirm" onClick={confirmAdd} disabled={!newName.trim()}>Add</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ArabicKeyboard
 ════════════════════════════════════════════════════════════════ */
 function ArabicKeyboard({ onKey, onDone }) {
   return (
@@ -337,9 +481,7 @@ function ArabicKeyboard({ onKey, onDone }) {
         <div key={ri} className="kb-row">
           {row.map(ch => (
             <button key={ch} className="key"
-              onMouseDown={e => { e.preventDefault(); onKey(ch); }}>
-              {ch}
-            </button>
+              onMouseDown={e => { e.preventDefault(); onKey(ch); }}>{ch}</button>
           ))}
           {ri === 2 && (
             <button className="key wide"
@@ -369,9 +511,7 @@ function CardSkeleton() {
           <div style={{ width:'72%', height:28, background:'rgba(27,42,74,.07)', borderRadius:8 }} />
           <div style={{ width:'50%', height:20, background:'rgba(27,42,74,.05)', borderRadius:6 }} />
         </div>
-        <p style={{ textAlign:'center', fontSize:13, color:'rgba(27,42,74,.35)', fontWeight:600 }}>
-          Generating card…
-        </p>
+        <p style={{ textAlign:'center', fontSize:13, color:'rgba(27,42,74,.35)', fontWeight:600 }}>Generating card…</p>
       </div>
     </div>
   );
@@ -431,7 +571,7 @@ function SwipeCard({ card, onAnswer }) {
   );
 
   if (answered) return (
-    <div className="slide-up">
+    <div className="slide-up" style={{ width:'100%' }}>
       <div className="card" style={{ cursor:'default' }}>
         <div className="card-chip">{card.emoji} {card.topic} · True / False</div>
         <QBody />
@@ -488,9 +628,7 @@ function MCCard({ card, onAnswer }) {
             }
             return (
               <button key={i} className={cls} disabled={done}
-                onClick={() => !done && setSel(i)}>
-                {opt}
-              </button>
+                onClick={() => !done && setSel(i)}>{opt}</button>
             );
           })}
         </div>
@@ -526,10 +664,8 @@ function TypeCard({ card, onAnswer }) {
     setEvaling(true);
     setShowKb(false);
     const res = await apiEvaluate(card.question_en, card.expectedAnswer, value.trim());
-    if (res) {
-      setCorrect(res.correct);
-      setFeedback(res.feedback);
-    } else {
+    if (res) { setCorrect(res.correct); setFeedback(res.feedback); }
+    else {
       const norm = s => s.trim().replace(/[ً-ٟ]/g, '');
       const ok   = norm(value) === norm(card.expectedAnswer);
       setCorrect(ok);
@@ -570,18 +706,14 @@ function TypeCard({ card, onAnswer }) {
             <div className={`reveal fade-in ${correct ? 'correct' : 'wrong'}`}>
               <span className="reveal-icon">{correct ? '✅' : '❌'}</span>
               <p className="reveal-text">{feedback}</p>
-              {!correct && (
-                <p className="reveal-text" style={{ marginTop:6 }}>
-                  Answer: <span className="reveal-answer">{card.expectedAnswer}</span>
-                </p>
-              )}
+              {!correct && <p className="reveal-text" style={{ marginTop:6 }}>
+                Answer: <span className="reveal-answer">{card.expectedAnswer}</span>
+              </p>}
             </div>
             <button className="btn-next fade-in" onClick={() => onAnswer(correct)}>Next →</button>
           </>
         )}
       </div>
-
-      {/* Keyboard renders inline, below the card */}
       {showKb && !done && !evaling && (
         <ArabicKeyboard onKey={handleKey} onDone={() => setShowKb(false)} />
       )}
@@ -618,11 +750,11 @@ function CompletionScreen({ streak, correctCount, total }) {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   HomePage
+   HomePage  — session-aware, per-user, novel cards
 ════════════════════════════════════════════════════════════════ */
 const DAILY_GOAL = 5;
 
-function HomePage({ streak, onStreakUpdate }) {
+function HomePage({ user, streak, onStreakUpdate }) {
   const [cardIdx, setCardIdx]   = useState(0);
   const [card, setCard]         = useState(null);
   const [loading, setLoading]   = useState(true);
@@ -632,21 +764,45 @@ function HomePage({ streak, onStreakUpdate }) {
   const fetchCard = useCallback(async (idx) => {
     setLoading(true);
     setCard(null);
-    const raw = await apiCard(getWS());
-    setCard(raw ? normalizeCard(raw, idx) : FALLBACK[idx % FALLBACK.length]);
+    const raw = await apiCard(user, getWS(user));
+    setCard(raw ? normalizeCard(raw, `${user}-${idx}-${Date.now()}`) : FALLBACK[idx % FALLBACK.length]);
     setLoading(false);
-  }, []);
+  }, [user]);
 
-  useEffect(() => { fetchCard(0); }, []);
+  // Restore session on mount (or when user switches)
+  useEffect(() => {
+    const saved = loadSession(user);
+    if (saved?.done) {
+      setDone(true);
+      setCorrect(saved.correctCount ?? 0);
+      setCardIdx(DAILY_GOAL);
+      setLoading(false);
+    } else if (saved?.cardIdx > 0) {
+      setCardIdx(saved.cardIdx);
+      setCorrect(saved.correctCount ?? 0);
+      fetchCard(saved.cardIdx);
+    } else {
+      fetchCard(0);
+    }
+  }, [user]);
 
   const handleAnswer = async (wasCorrect) => {
-    if (wasCorrect) { setCorrect(c => c+1); if (card?.topic) dropWS(card.topic); }
-    else            { if (card?.topic) addWS(card.topic); }
-    const res = await apiRecord(card.type, card.topic, card.question_en||'', wasCorrect);
+    const newCorrect = correctCt + (wasCorrect ? 1 : 0);
+    setCorrect(newCorrect);
+
+    if (wasCorrect) dropWS(user, card?.topic);
+    else            addWS(user, card?.topic);
+
+    const res = await apiRecord(user, card.type, card.topic, card.question_en||'', wasCorrect);
     if (res?.streak) onStreakUpdate(res.streak);
-    const next = cardIdx + 1;
-    if (next >= DAILY_GOAL) setDone(true);
-    else { setCardIdx(next); fetchCard(next); }
+
+    const next   = cardIdx + 1;
+    const isDone = next >= DAILY_GOAL;
+
+    saveSession(user, { cardIdx: next, correctCount: newCorrect, done: isDone });
+
+    if (isDone) { setDone(true); setCardIdx(next); }
+    else        { setCardIdx(next); fetchCard(next); }
   };
 
   if (done) return <CompletionScreen streak={streak} correctCount={correctCt} total={DAILY_GOAL} />;
@@ -672,12 +828,12 @@ function HomePage({ streak, onStreakUpdate }) {
 /* ════════════════════════════════════════════════════════════════
    JourneyPage
 ════════════════════════════════════════════════════════════════ */
-function JourneyPage({ streak }) {
-  const spots = getWS();
+function JourneyPage({ user, streak }) {
+  const spots = getWS(user);
   return (
     <div className="journey slide-up">
       <div className="journey-icon">🗺️</div>
-      <h2 className="journey-title">Your Journey</h2>
+      <h2 className="journey-title">{user}'s Journey</h2>
       <p className="journey-desc">Progress tracking, learning path, and achievements coming soon.</p>
       <div style={{ width:'100%' }}>
         <div className="info-row">
@@ -711,13 +867,23 @@ function JourneyPage({ streak }) {
    App
 ════════════════════════════════════════════════════════════════ */
 function App() {
-  const [route, setRoute]   = useState(window.location.hash || '#/');
-  const [streak, setStreak] = useState({
-    current_streak:0, cards_today:0, daily_goal:5, total_cards_ever:0,
-  });
+  const [route,  setRoute]  = useState(window.location.hash || '#/');
+  const [user,   setUser]   = useState(loadCurUser);
+  const [users,  setUsers]  = useState(loadUsers);
+  const [streak, setStreak] = useState({ current_streak:0, cards_today:0, daily_goal:5, total_cards_ever:0 });
+
+  // Fetch streak whenever user changes
+  useEffect(() => {
+    apiStreak(user).then(s => {
+      if (!s) return;
+      setStreak(s);
+      if (Array.isArray(s.users)) {
+        setUsers(prev => [...new Set([...prev, ...s.users])]);
+      }
+    });
+  }, [user]);
 
   useEffect(() => {
-    apiStreak().then(s => { if (s) setStreak(s); });
     const onHash = () => setRoute(window.location.hash || '#/');
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
@@ -728,33 +894,39 @@ function App() {
     setRoute(hash);
   };
 
+  const switchUser = name => {
+    saveCurUser(name);
+    setUser(name);
+  };
+
+  const addUser = name => {
+    const updated = [...new Set([...users, name])];
+    saveUsers(updated);
+    setUsers(updated);
+    apiAddUser(name);
+    switchUser(name);
+  };
+
   return (
     <>
-      {/* Header */}
       <div className="header">
         <div className="logo">
-          <img src="/logo.png" alt="Ali's Arabiya logo" className="logo-img" />
+          <img src="/logo.png" alt="logo" className="logo-img" />
           Ali's Arabiya
         </div>
-        <div className="streak-pill">
-          <span>🔥</span>
-          <span>{streak.current_streak??0}</span>
+        <div className="header-right">
+          <UserDropdown user={user} users={users} onSwitch={switchUser} onAdd={addUser} />
+          <div className="streak-pill">🔥 {streak.current_streak??0}</div>
         </div>
       </div>
 
-      {/* Tab nav — sits between header and page content */}
       <div className="top-tabs">
-        <button className={`tab-btn ${route==='#/' ? 'active':''}`} onClick={() => navigate('#/')}>
-          Cards
-        </button>
-        <button className={`tab-btn ${route==='#/journey' ? 'active':''}`} onClick={() => navigate('#/journey')}>
-          Journey
-        </button>
+        <button className={`tab-btn ${route==='#/' ? 'active':''}`} onClick={() => navigate('#/')}>Cards</button>
+        <button className={`tab-btn ${route==='#/journey' ? 'active':''}`} onClick={() => navigate('#/journey')}>Journey</button>
       </div>
 
-      {/* Page content */}
-      {route === '#/'        && <HomePage    streak={streak} onStreakUpdate={setStreak} />}
-      {route === '#/journey' && <JourneyPage streak={streak} />}
+      {route === '#/'        && <HomePage    key={user} user={user} streak={streak} onStreakUpdate={setStreak} />}
+      {route === '#/journey' && <JourneyPage key={user} user={user} streak={streak} />}
     </>
   );
 }
