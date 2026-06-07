@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Arabiya — Learn Arabic</title>
+  <title>Ali's Arabiya — Learn Arabic</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
@@ -45,12 +45,12 @@
       overflow-x: hidden;
     }
 
-    /* Header */
+    /* ── Header ─────────────────────────────────────────────── */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 20px 12px;
+      padding: 12px 18px 11px;
       background: rgba(250,247,242,.98);
       border-bottom: 1.5px solid rgba(201,150,58,.14);
       position: sticky;
@@ -58,29 +58,84 @@
       z-index: 100;
       backdrop-filter: blur(6px);
     }
-    .logo { font-size: 20px; font-weight: 800; color: var(--navy); letter-spacing: -.3px; display: flex; align-items: center; gap: 6px; }
-    .logo-ar { font-family: var(--arabic); font-size: 22px; color: var(--gold); }
-    .streak-pill { display: flex; align-items: center; gap: 4px; background: var(--navy); color: #fff; padding: 5px 13px; border-radius: 20px; font-size: 14px; font-weight: 700; }
+    .logo {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -.3px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .logo-img {
+      height: 40px;
+      width: 40px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid #000;
+      flex-shrink: 0;
+    }
+    .streak-pill {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--navy);
+      color: #fff;
+      padding: 5px 13px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+    }
 
-    /* Progress */
+    /* ── Top tab nav ─────────────────────────────────────────── */
+    .top-tabs {
+      display: flex;
+      background: var(--white);
+      border-bottom: 1.5px solid rgba(27,42,74,.09);
+      position: sticky;
+      top: 65px;
+      z-index: 90;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 11px 8px 9px;
+      border: none;
+      border-bottom: 2.5px solid transparent;
+      margin-bottom: -1.5px;
+      background: none;
+      cursor: pointer;
+      font-family: var(--ui);
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(27,42,74,.38);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      transition: color .13s, border-color .13s;
+    }
+    .tab-btn.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    /* ── Progress ────────────────────────────────────────────── */
     .progress-wrap { padding: 14px 20px 0; }
     .progress-track { height: 7px; background: rgba(27,42,74,.1); border-radius: 4px; overflow: hidden; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #E8B45A); border-radius: 4px; transition: width .45s cubic-bezier(.4,0,.2,1); }
     .progress-label { font-size: 11.5px; color: var(--navy); opacity: .55; text-align: center; margin-top: 5px; font-weight: 700; letter-spacing: .3px; }
 
-    /* Main area */
-    .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 18px 88px; min-height: 0; }
+    /* ── Main area ───────────────────────────────────────────── */
+    .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 18px 32px; min-height: 0; }
 
-    /* Card shell */
+    /* ── Card shell ──────────────────────────────────────────── */
     .card { width: 100%; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 26px 22px 22px; position: relative; will-change: transform; touch-action: pan-y; }
     .card-chip { display: inline-flex; align-items: center; gap: 5px; background: rgba(27,42,74,.06); color: var(--navy); padding: 4px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 800; margin-bottom: 20px; letter-spacing: .3px; text-transform: uppercase; }
 
-    /* Text */
+    /* ── Text ────────────────────────────────────────────────── */
     .arabic { font-family: var(--arabic); font-size: 34px; line-height: 1.65; direction: rtl; text-align: right; color: var(--navy); display: block; width: 100%; }
     .english { font-size: 17px; font-weight: 600; color: var(--navy); line-height: 1.45; text-align: center; }
     .q-area { text-align: center; margin-bottom: 20px; min-height: 80px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; }
 
-    /* Swipe */
+    /* ── Swipe ───────────────────────────────────────────────── */
     .swipe-ov { position: absolute; inset: 0; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 52px; font-weight: 900; pointer-events: none; border: 3px solid transparent; }
     .swipe-ov.yes { background: rgba(107,143,113,.1); border-color: var(--green); color: var(--green); }
     .swipe-ov.no  { background: rgba(196,96,58,.1);   border-color: var(--red);   color: var(--red);   }
@@ -91,7 +146,7 @@
     .swipe-btn.no  { border-color: var(--red);   color: var(--red);   }
     .swipe-hint { text-align: center; font-size: 12px; color: rgba(27,42,74,.38); margin-top: 10px; font-weight: 600; }
 
-    /* MC */
+    /* ── MC ──────────────────────────────────────────────────── */
     .mc-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
     .mc-opt { padding: 13px 17px; border-radius: 12px; border: 2px solid rgba(27,42,74,.12); background: var(--white); cursor: pointer; font-family: var(--arabic); font-size: 22px; direction: rtl; text-align: right; color: var(--navy); transition: border-color .13s, background .13s, color .13s; line-height: 1.4; }
     .mc-opt.en { font-family: var(--ui); font-size: 15px; direction: ltr; text-align: left; }
@@ -100,12 +155,12 @@
     .mc-opt.correct { background: rgba(107,143,113,.12); border-color: var(--green); color: var(--green); }
     .mc-opt.wrong   { background: rgba(196,96,58,.1);    border-color: var(--red);   color: var(--red);   }
 
-    /* Type input */
+    /* ── Type input ──────────────────────────────────────────── */
     .type-input { width: 100%; padding: 13px 15px; border-radius: 12px; border: 2px solid rgba(27,42,74,.14); font-family: var(--arabic); font-size: 26px; direction: rtl; text-align: right; color: var(--navy); background: var(--white); outline: none; transition: border-color .18s; margin-bottom: 12px; }
     .type-input:focus { border-color: var(--gold); }
     .type-input:disabled { background: rgba(27,42,74,.03); }
 
-    /* Buttons */
+    /* ── Buttons ─────────────────────────────────────────────── */
     .btn-submit { width: 100%; padding: 14px; background: var(--navy); color: #fff; border: none; border-radius: 12px; font-family: var(--ui); font-size: 15px; font-weight: 800; cursor: pointer; transition: opacity .13s, transform .13s; }
     .btn-submit:hover:not(:disabled) { opacity: .88; }
     .btn-submit:active { transform: scale(.97); }
@@ -114,7 +169,7 @@
     .btn-next:hover { opacity: .9; }
     .btn-next:active { transform: scale(.97); }
 
-    /* Reveal */
+    /* ── Reveal ──────────────────────────────────────────────── */
     .reveal { margin-top: 16px; padding: 15px 16px; border-radius: 12px; border: 1.5px solid; }
     .reveal.correct { background: rgba(107,143,113,.1);  border-color: rgba(107,143,113,.35); }
     .reveal.wrong   { background: rgba(196,96,58,.08);   border-color: rgba(196,96,58,.3);    }
@@ -122,24 +177,22 @@
     .reveal-text { font-size: 14px; color: var(--navy); line-height: 1.55; }
     .reveal-answer { font-family: var(--arabic); font-size: 26px; direction: rtl; color: var(--navy); display: inline-block; margin: 4px 0 2px; }
 
-    /* Arabic keyboard */
-    .keyboard { position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; background: rgba(22,34,60,.97); padding: 10px 6px 12px; z-index: 200; border-top: 1px solid rgba(255,255,255,.08); }
+    /* ── Arabic keyboard — inline below the card ─────────────── */
+    .keyboard {
+      width: 100%;
+      background: rgba(22,34,60,.97);
+      padding: 10px 6px 12px;
+      border-radius: 14px;
+      margin-top: 10px;
+    }
     .kb-row { display: flex; justify-content: center; gap: 4px; margin-bottom: 5px; direction: rtl; }
     .key { background: rgba(255,255,255,.13); color: #fff; border: none; border-radius: 6px; padding: 9px 5px 8px; font-family: var(--arabic); font-size: 17px; cursor: pointer; flex: 1; max-width: 33px; text-align: center; transition: background .08s; line-height: 1; }
     .key:active { background: rgba(255,255,255,.28); }
     .key.wide  { max-width: 52px; font-family: var(--ui); font-size: 11px; flex: 1.6; }
     .key.space { max-width: 140px; font-size: 11px; font-family: var(--ui); flex: 4; }
 
-    /* Bottom nav */
-    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; background: var(--white); border-top: 1.5px solid rgba(27,42,74,.09); display: flex; z-index: 300; box-shadow: 0 -4px 20px rgba(27,42,74,.07); }
-    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 11px 8px 9px; border: none; background: none; cursor: pointer; gap: 3px; transition: opacity .13s; }
-    .nav-btn:hover { opacity: .72; }
-    .nav-icon { font-size: 21px; }
-    .nav-label { font-size: 10px; font-weight: 800; color: rgba(27,42,74,.38); text-transform: uppercase; letter-spacing: .5px; }
-    .nav-btn.active .nav-label { color: var(--gold); }
-
-    /* Completion */
-    .completion { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 36px 24px 100px; }
+    /* ── Completion ──────────────────────────────────────────── */
+    .completion { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 36px 24px 40px; }
     .completion-moon { font-size: 64px; display: block; margin-bottom: 14px; animation: sway 3.5s ease-in-out infinite; }
     @keyframes sway { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
     .completion-title { font-size: 26px; font-weight: 800; color: var(--navy); margin-bottom: 6px; }
@@ -150,8 +203,8 @@
     .stat-lbl { font-size: 11px; font-weight: 700; color: rgba(27,42,74,.45); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
     .arabic-blessing { font-family: var(--arabic); font-size: 18px; color: rgba(27,42,74,.45); direction: rtl; }
 
-    /* Journey */
-    .journey { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 22px 100px; text-align: center; }
+    /* ── Journey ─────────────────────────────────────────────── */
+    .journey { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 22px 40px; text-align: center; }
     .journey-icon  { font-size: 60px; margin-bottom: 18px; }
     .journey-title { font-size: 24px; font-weight: 800; color: var(--navy); margin-bottom: 10px; }
     .journey-desc  { font-size: 14.5px; color: rgba(27,42,74,.52); line-height: 1.65; max-width: 290px; margin-bottom: 30px; }
@@ -159,13 +212,11 @@
     .info-key { font-size: 13px; font-weight: 700; color: rgba(27,42,74,.55); }
     .info-val { font-size: 18px; font-weight: 800; color: var(--navy); }
 
-    /* Animations */
+    /* ── Animations ──────────────────────────────────────────── */
     @keyframes slideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
     .slide-up { animation: slideUp .28s cubic-bezier(.4,0,.2,1) forwards; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .fade-in { animation: fadeIn .22s ease forwards; }
-
-    /* Skeleton shimmer */
     @keyframes shimmer { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
     .shimmer { animation: shimmer 1.4s ease-in-out infinite; }
   </style>
@@ -189,7 +240,7 @@ const TOPIC_EMOJI = {
 };
 const topicEmoji = t => TOPIC_EMOJI[(t||'').toLowerCase()] ?? '📖';
 
-/* ── Normalize raw Claude card to unified shape ───────────────── */
+/* ── Normalize raw Claude card ────────────────────────────────── */
 function normalizeCard(raw, id) {
   const base = {
     id, type: raw.type, topic: raw.topic ?? 'Arabic',
@@ -202,26 +253,26 @@ function normalizeCard(raw, id) {
     const opts = raw.options ?? [];
     return { ...base, options: opts, correctIndex: opts.findIndex(o => o === raw.answer) };
   }
-  return { ...base, expectedAnswer: raw.answer }; // type_answer
+  return { ...base, expectedAnswer: raw.answer };
 }
 
-/* ── Fallback cards (when API unavailable) ────────────────────── */
+/* ── Fallback cards ───────────────────────────────────────────── */
 const FALLBACK = [
-  normalizeCard({ type:'swipe',           topic:'Vocabulary',       question_en:'كَلْب means "dog"',               question_ar:'كَلْب',       answer:'true',       explanation_en:'كَلْب (kalb) = dog. Plural: كِلاب.' }, 'f1'),
-  normalizeCard({ type:'multiple_choice', topic:'Greetings',        question_en:'How do you say "Good morning"?',                            answer:'صباح الخير', options:['مرحبا','صباح الخير','شكراً','مساء النور'], explanation_en:'صباح الخير (ṣabāḥ al-khayr). مرحبا = hello.' }, 'f2'),
-  normalizeCard({ type:'type_answer',     topic:'Numbers',           question_en:'Write the Arabic word for "three"',                         answer:'ثلاثة',      explanation_en:'ثلاثة (thalātha). واحد، اثنان، ثلاثة.' }, 'f3'),
-  normalizeCard({ type:'swipe',           topic:'Grammar',           question_en:'Arabic nouns have masculine and feminine grammatical gender.', answer:'true',      explanation_en:'Yes — feminine nouns usually end in ـة (tā marbūṭa).' }, 'f4'),
-  normalizeCard({ type:'multiple_choice', topic:'Colors',            question_en:'What does أَزْرَق (azraq) mean?', question_ar:'أَزْرَق',     answer:'Blue',       options:['Red','Green','Blue','Yellow'], explanation_en:'أَزْرَق = blue. أَحْمَر = red, أَخْضَر = green.' }, 'f5'),
+  normalizeCard({ type:'swipe',           topic:'Vocabulary',  question_en:'كَلْب means "dog"',                question_ar:'كَلْب',    answer:'true',       explanation_en:'كَلْب (kalb) = dog. Plural: كِلاب.' }, 'f1'),
+  normalizeCard({ type:'multiple_choice', topic:'Greetings',   question_en:'How do you say "Good morning"?',                          answer:'صباح الخير', options:['مرحبا','صباح الخير','شكراً','مساء النور'], explanation_en:'صباح الخير (ṣabāḥ al-khayr). مرحبا = hello.' }, 'f2'),
+  normalizeCard({ type:'type_answer',     topic:'Numbers',     question_en:'Write the Arabic word for "three"',                       answer:'ثلاثة',      explanation_en:'ثلاثة (thalātha). واحد، اثنان، ثلاثة.' }, 'f3'),
+  normalizeCard({ type:'swipe',           topic:'Grammar',     question_en:'Arabic nouns have masculine and feminine grammatical gender.', answer:'true',   explanation_en:'Yes — feminine nouns usually end in ـة (tā marbūṭa).' }, 'f4'),
+  normalizeCard({ type:'multiple_choice', topic:'Colors',      question_en:'What does أَزْرَق (azraq) mean?', question_ar:'أَزْرَق', answer:'Blue',       options:['Red','Green','Blue','Yellow'], explanation_en:'أَزْرَق = blue. أَحْمَر = red, أَخْضَر = green.' }, 'f5'),
 ];
 
-/* ── Arabic keyboard layout ───────────────────────────────────── */
+/* ── Arabic keyboard ──────────────────────────────────────────── */
 const KB = [
   ['ض','ص','ث','ق','ف','غ','ع','ه','خ','ح','ج','د'],
   ['ش','س','ي','ب','ل','ا','ت','ن','م','ك','ط'],
   ['ئ','ء','ؤ','ر','لا','ى','ة','و','ز','ظ'],
 ];
 
-/* ── Weak-spot localStorage cache ─────────────────────────────── */
+/* ── Weak-spot cache ──────────────────────────────────────────── */
 const WS_KEY = 'arabiya_weak_spots';
 const getWS  = ()    => { try { return JSON.parse(localStorage.getItem(WS_KEY)||'[]'); } catch { return []; } };
 const setWS  = arr   => localStorage.setItem(WS_KEY, JSON.stringify(arr.slice(0,8)));
@@ -277,7 +328,7 @@ async function apiRecord(card_type, topic, question, was_correct) {
 const isTouch = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 /* ════════════════════════════════════════════════════════════════
-   ArabicKeyboard
+   ArabicKeyboard — renders inline below the card
 ════════════════════════════════════════════════════════════════ */
 function ArabicKeyboard({ onKey, onDone }) {
   return (
@@ -327,7 +378,7 @@ function CardSkeleton() {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   SwipeCard  — card.question_en, card.question_ar, card.isTrue
+   SwipeCard
 ════════════════════════════════════════════════════════════════ */
 function SwipeCard({ card, onAnswer }) {
   const [dragX, setDragX]     = useState(0);
@@ -394,7 +445,7 @@ function SwipeCard({ card, onAnswer }) {
   );
 
   return (
-    <div>
+    <div style={{ width:'100%' }}>
       <div className="card" style={style}
         onMouseDown={onMD} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={end}>
         <div className="card-chip">{card.emoji} {card.topic} · True / False</div>
@@ -412,7 +463,7 @@ function SwipeCard({ card, onAnswer }) {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   MCCard  — card.question_en, card.options, card.correctIndex
+   MCCard
 ════════════════════════════════════════════════════════════════ */
 function MCCard({ card, onAnswer }) {
   const [sel, setSel] = useState(null);
@@ -421,7 +472,7 @@ function MCCard({ card, onAnswer }) {
   const isAr    = s => /[؀-ۿ]/.test(s);
 
   return (
-    <div className="slide-up">
+    <div className="slide-up" style={{ width:'100%' }}>
       <div className="card" style={{ cursor:'default' }}>
         <div className="card-chip">{card.emoji} {card.topic} · Multiple Choice</div>
         <div className="q-area">
@@ -458,15 +509,15 @@ function MCCard({ card, onAnswer }) {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   TypeCard  — card.question_en, card.expectedAnswer → /api/evaluate
+   TypeCard
 ════════════════════════════════════════════════════════════════ */
 function TypeCard({ card, onAnswer }) {
-  const [value, setValue]     = useState('');
-  const [evaling, setEvaling] = useState(false);
-  const [done, setDone]       = useState(false);
-  const [correct, setCorrect] = useState(null);
+  const [value, setValue]       = useState('');
+  const [evaling, setEvaling]   = useState(false);
+  const [done, setDone]         = useState(false);
+  const [correct, setCorrect]   = useState(null);
   const [feedback, setFeedback] = useState('');
-  const [showKb, setShowKb]   = useState(false);
+  const [showKb, setShowKb]     = useState(false);
   const inputRef = useRef(null);
   const touch = isTouch();
 
@@ -474,7 +525,6 @@ function TypeCard({ card, onAnswer }) {
     if (!value.trim() || done || evaling) return;
     setEvaling(true);
     setShowKb(false);
-
     const res = await apiEvaluate(card.question_en, card.expectedAnswer, value.trim());
     if (res) {
       setCorrect(res.correct);
@@ -497,7 +547,7 @@ function TypeCard({ card, onAnswer }) {
   };
 
   return (
-    <div className="slide-up">
+    <div className="slide-up" style={{ width:'100%' }}>
       <div className="card" style={{ cursor:'default' }}>
         <div className="card-chip">{card.emoji} {card.topic} · Write It</div>
         <div className="q-area">
@@ -530,6 +580,8 @@ function TypeCard({ card, onAnswer }) {
           </>
         )}
       </div>
+
+      {/* Keyboard renders inline, below the card */}
       {showKb && !done && !evaling && (
         <ArabicKeyboard onKey={handleKey} onDone={() => setShowKb(false)} />
       )}
@@ -566,7 +618,7 @@ function CompletionScreen({ streak, correctCount, total }) {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   HomePage  — fetches cards from /api/card, falls back to FALLBACK
+   HomePage
 ════════════════════════════════════════════════════════════════ */
 const DAILY_GOAL = 5;
 
@@ -588,18 +640,12 @@ function HomePage({ streak, onStreakUpdate }) {
   useEffect(() => { fetchCard(0); }, []);
 
   const handleAnswer = async (wasCorrect) => {
-    if (wasCorrect) {
-      setCorrect(c => c+1);
-      if (card?.topic) dropWS(card.topic);
-    } else {
-      if (card?.topic) addWS(card.topic);
-    }
-
+    if (wasCorrect) { setCorrect(c => c+1); if (card?.topic) dropWS(card.topic); }
+    else            { if (card?.topic) addWS(card.topic); }
     const res = await apiRecord(card.type, card.topic, card.question_en||'', wasCorrect);
     if (res?.streak) onStreakUpdate(res.streak);
-
     const next = cardIdx + 1;
-    if (next >= DAILY_GOAL) { setDone(true); }
+    if (next >= DAILY_GOAL) setDone(true);
     else { setCardIdx(next); fetchCard(next); }
   };
 
@@ -632,9 +678,7 @@ function JourneyPage({ streak }) {
     <div className="journey slide-up">
       <div className="journey-icon">🗺️</div>
       <h2 className="journey-title">Your Journey</h2>
-      <p className="journey-desc">
-        Progress tracking, learning path, and achievements coming soon.
-      </p>
+      <p className="journey-desc">Progress tracking, learning path, and achievements coming soon.</p>
       <div style={{ width:'100%' }}>
         <div className="info-row">
           <span className="info-key">🔥 Current Streak</span>
@@ -667,7 +711,7 @@ function JourneyPage({ streak }) {
    App
 ════════════════════════════════════════════════════════════════ */
 function App() {
-  const [route, setRoute] = useState(window.location.hash || '#/');
+  const [route, setRoute]   = useState(window.location.hash || '#/');
   const [streak, setStreak] = useState({
     current_streak:0, cards_today:0, daily_goal:5, total_cards_ever:0,
   });
@@ -686,10 +730,11 @@ function App() {
 
   return (
     <>
+      {/* Header */}
       <div className="header">
         <div className="logo">
-          <span className="logo-ar">عربية</span>
-          Arabiya
+          <img src="/logo.png" alt="Ali's Arabiya logo" className="logo-img" />
+          Ali's Arabiya
         </div>
         <div className="streak-pill">
           <span>🔥</span>
@@ -697,19 +742,19 @@ function App() {
         </div>
       </div>
 
+      {/* Tab nav — sits between header and page content */}
+      <div className="top-tabs">
+        <button className={`tab-btn ${route==='#/' ? 'active':''}`} onClick={() => navigate('#/')}>
+          Cards
+        </button>
+        <button className={`tab-btn ${route==='#/journey' ? 'active':''}`} onClick={() => navigate('#/journey')}>
+          Journey
+        </button>
+      </div>
+
+      {/* Page content */}
       {route === '#/'        && <HomePage    streak={streak} onStreakUpdate={setStreak} />}
       {route === '#/journey' && <JourneyPage streak={streak} />}
-
-      <nav className="bottom-nav">
-        <button className={`nav-btn ${route==='#/' ? 'active':''}`} onClick={() => navigate('#/')}>
-          <span className="nav-icon">🃏</span>
-          <span className="nav-label">Cards</span>
-        </button>
-        <button className={`nav-btn ${route==='#/journey' ? 'active':''}`} onClick={() => navigate('#/journey')}>
-          <span className="nav-icon">🗺️</span>
-          <span className="nav-label">Journey</span>
-        </button>
-      </nav>
     </>
   );
 }
