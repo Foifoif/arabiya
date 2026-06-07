@@ -5,7 +5,7 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "arabiya-db"
-database_id = "YOUR_DATABASE_ID_HERE"
+database_id = "fe2b7fc5-af20-4843-814f-6ee3271de529"
 # To get your database_id:
 # 1. Run: wrangler d1 create arabiya-db
 # 2. Copy the database_id from the output and paste it above
