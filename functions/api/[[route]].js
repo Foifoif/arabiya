@@ -30,32 +30,26 @@ async function migrate(db) {
   }
 }
 
-// ── Claude helper — with optional prompt caching ─────────────────
-// Prompt caching cuts costs ~90% on the system prompt tokens.
-// The system prompt must be >1024 tokens to qualify; ours is ~1500+.
-async function callClaude(apiKey, { system, userMsg, maxTokens = 700, cache = false }) {
-  const systemPayload = cache
-    ? [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }]
-    : system;
-
-  const headers = {
-    'Content-Type': 'application/json',
-    'x-api-key': apiKey,
-    'anthropic-version': '2023-06-01',
-  };
-  if (cache) headers['anthropic-beta'] = 'prompt-caching-2024-07-31';
-
+// ── Claude helper ────────────────────────────────────────────────
+async function callClaude(apiKey, { system, userMsg, maxTokens = 700 }) {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5',
       max_tokens: maxTokens,
-      system: systemPayload,
+      system,
       messages: [{ role: 'user', content: userMsg }],
     }),
   });
-  if (!res.ok) throw new Error(`Claude ${res.status}: ${await res.text()}`);
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`Claude ${res.status}: ${errBody}`);
+  }
   return (await res.json()).content[0].text;
 }
 
@@ -205,7 +199,6 @@ export async function onRequest(context) {
         system:   SESSION_SYSTEM,
         userMsg:  parts.join('\n'),
         maxTokens: 2500,
-        cache:    true,  // prompt caching on the big system prompt
       });
 
       const cards = parseClaudeJSON(raw);
@@ -219,7 +212,6 @@ export async function onRequest(context) {
         system:   EVAL_SYSTEM,
         userMsg:  `Question: "${question}"\nExpected: "${expected}"\nStudent wrote: "${user_answer}"\n\nIs this correct?`,
         maxTokens: 150,
-        cache:    true,
       });
       return json(parseClaudeJSON(raw));
     }

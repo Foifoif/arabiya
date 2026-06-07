@@ -304,14 +304,13 @@ async function apiStreak(user) {
 }
 
 async function apiSession(user, learning_goal, weak_spots=[]) {
-  try {
-    const r = await fetch('/api/session', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ user, learning_goal, weak_spots }),
-    });
-    if (!r.ok) return null;
-    return r.json();
-  } catch { return null; }
+  const r = await fetch('/api/session', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ user, learning_goal, weak_spots }),
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data?.error || `HTTP ${r.status}`);
+  return data;
 }
 
 async function apiEvaluate(question, expected, user_answer) {
@@ -698,6 +697,7 @@ function HomePage({ user, streak, onStreakUpdate }) {
   const [cards, setCards]       = useState(null);
   const [cardIdx, setCardIdx]   = useState(0);
   const [loading, setLoading]   = useState(false);
+  const [apiError, setApiError] = useState('');
   const [correctCt, setCorrect] = useState(0);
   const [done, setDone]         = useState(false);
 
@@ -724,16 +724,22 @@ function HomePage({ user, streak, onStreakUpdate }) {
     }
 
     // Fresh session — one Claude call for all 5 cards
-    setCardIdx(0); setCorrect(0); setDone(false);
-    const res = await apiSession(user, g, getWS(user));
-    const rawCards = res?.cards;
-    if (rawCards?.length) {
-      saveCards(user, g, rawCards);
-      setCards(rawCards.map((c,i) => normalizeCard(c, `${user}-${i}-${Date.now()}`)));
-    } else {
+    setCardIdx(0); setCorrect(0); setDone(false); setApiError('');
+    try {
+      const res = await apiSession(user, g, getWS(user));
+      const rawCards = res?.cards;
+      if (rawCards?.length) {
+        saveCards(user, g, rawCards);
+        setCards(rawCards.map((c,i) => normalizeCard(c, `${user}-${i}-${Date.now()}`)));
+        saveSession(user, g, { cardIdx: 0, correctCount: 0, done: false });
+      } else {
+        setApiError('Claude returned no cards. Check Cloudflare Functions logs.');
+        setCards(FALLBACK);
+      }
+    } catch (err) {
+      setApiError(`API error: ${err.message}`);
       setCards(FALLBACK);
     }
-    saveSession(user, g, { cardIdx: 0, correctCount: 0, done: false });
     setLoading(false);
   }, [user]);
 
@@ -787,6 +793,11 @@ function HomePage({ user, streak, onStreakUpdate }) {
         </div>
         <p className="progress-label">{cardIdx} / {DAILY_GOAL} cards today</p>
       </div>
+      {apiError && (
+        <div style={{ margin:'10px 18px 0', padding:'10px 14px', background:'rgba(196,96,58,.1)', border:'1.5px solid rgba(196,96,58,.4)', borderRadius:10, fontSize:12, color:'var(--red)', fontWeight:600 }}>
+          ⚠️ {apiError}
+        </div>
+      )}
       <div className="main">
         {loading && <CardSkeleton message={goal ? `Building cards on "${goal}"…` : 'Generating your cards…'} />}
         {!loading && card?.type === 'swipe'           && <SwipeCard key={card.id} card={card} onAnswer={handleAnswer} />}
