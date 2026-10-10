@@ -27,7 +27,7 @@ test("singular self-assessment preserves typed answer and persists schedule", as
   await expect(page.getByLabel("Your answer (optional)")).toHaveValue(
     "my own attempt",
   );
-  await page.getByRole("button", { name: /Almost There/ }).click();
+  await page.getByRole("button", { name: /Hard/ }).click();
   expect((await data(page)).reviews).toHaveLength(1);
   expect((await data(page)).reviews[0].result).toBe("almost");
   expect(JSON.stringify(await data(page))).not.toContain("my own attempt");
@@ -263,4 +263,31 @@ test("theme, backup, narrow layout, and accessibility", async ({
       .locator(".study-card")
       .evaluate((el) => getComputedStyle(el).transform),
   ).toBe("none");
+});
+
+test("card editor translates English, preserves edits on failure, and saves overrides", async ({ page }) => {
+  await page.route("https://api.mymemory.translated.net/**", route => route.fulfill({
+    json: { responseStatus: 200, responseData: { translatedText: "بَيْت" } },
+  }));
+  await page.goto("/");
+  await nav(page, "Cards");
+  await page.getByRole("button", { name: "Add Card", exact: true }).click();
+  const button = page.getByRole("button", { name: "Translate to Arabic", exact: true });
+  await expect(button).toBeDisabled();
+  await page.getByLabel("Back headline", { exact: true }).fill("house");
+  await page.getByLabel("Front description (optional)").fill("My note");
+  await button.click();
+  await expect(page.getByLabel("Front headline", { exact: true })).toHaveValue("بَيْت");
+  await page.getByLabel("Front headline", { exact: true }).fill("بيت");
+  await page.unroute("https://api.mymemory.translated.net/**");
+  await page.route("https://api.mymemory.translated.net/**", route => route.fulfill({ json: { responseStatus: 429 } }));
+  await button.click();
+  await expect(page.getByRole("alert")).toContainText("quota");
+  await expect(page.getByLabel("Front headline", { exact: true })).toHaveValue("بيت");
+  await expect(page.getByLabel("Back headline", { exact: true })).toHaveValue("house");
+  await page.getByRole("button", { name: "Save card", exact: true }).click();
+  const saved = (await data(page)).cards.at(-1);
+  expect(saved.front.headline).toBe("بيت");
+  expect(saved.front.description).toBe("My note");
+  expect(saved.back.headline).toBe("house");
 });
