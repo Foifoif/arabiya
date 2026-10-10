@@ -1972,3 +1972,14 @@ dialog::backdrop {
     scale: 1;
   }
 }
+
+.cloud-panel { margin-bottom: 28px; }
+.cloud-login { display: grid; gap: 14px; max-width: 420px; margin: 20px 0; }
+.cloud-login label { display: grid; gap: 6px; }
+.cloud-panel h3 { margin-top: 24px; }
+.cloud-choice { margin: 20px 0; padding: 20px; border: 1px solid var(--line); border-radius: 12px; }
+.cloud-version, .cloud-banner { display: flex; gap: 16px; justify-content: space-between; align-items: center; padding: 14px 0; flex-wrap: wrap; }
+.cloud-version { border-bottom: 1px solid var(--line); }
+.cloud-banner { margin-bottom: 20px; }
+.cloud-panel details { margin-top: 24px; }
+.cloud-panel summary { cursor: pointer; }

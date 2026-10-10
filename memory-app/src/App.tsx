@@ -70,6 +70,7 @@ import {
   STORAGE_KEY,
 } from "./storage";
 import { translate } from "./translation";
+import { CloudPanel, useCloudSync, statusLabel } from "./CloudPanel";
 import { intervalLabel, schedule } from "./scheduler";
 type Page = "home" | "cards" | "tools" | "more";
 type Commit = (mutate: (d: Data) => void) => boolean;
@@ -251,6 +252,13 @@ export default function App() {
       return false;
     }
   };
+  const cloud = useCloudSync(data, () => loadData(localStorage), (incoming) => {
+    const next = commitData(localStorage, ref.current!, d => {
+      Object.assign(d, incoming, { revision: d.revision, round: null, formatBag: [], recentFormats: [], recentCardIds: [] });
+    });
+    ref.current = next;
+    setData(next);
+  });
   function go(next: Page) {
     setPage(next);
     setEdit(null);
@@ -326,7 +334,7 @@ export default function App() {
           <div className="topic-marker">Aa</div>
           <div>
             <strong>{data.settings.topic || "All topics"}</strong>
-            <span>Local collection</span>
+            <span>{cloud.state.email ? "Cloud collection" : "Local collection"}</span>
           </div>
         </div>
       </aside>
@@ -342,7 +350,7 @@ export default function App() {
           <div className="topbar-actions">
             <span className="saved-status">
               <span />
-              Saved on this device
+              {statusLabel[cloud.state.status]}
             </span>
             <button
               className="icon-button theme-toggle"
@@ -371,6 +379,12 @@ export default function App() {
           </div>
         )}
         <main>
+          {page !== "more" && ["connect", "conflict", "error", "signed-out", "offline"].includes(cloud.state.status) && (
+            <div className="cloud-banner" role="status">
+              <span>{statusLabel[cloud.state.status]}</span>
+              <button className="text-button" onClick={() => go("more")}>Manage cloud saving</button>
+            </div>
+          )}
           {page === "home" ? (
             <Home
               data={data}
@@ -399,13 +413,14 @@ export default function App() {
               }}
             />
           ) : (
-            <More data={data} commit={commit} now={now} notify={setNotice} />
+            <More data={data} commit={commit} now={now} notify={setNotice}
+              cloudPanel={<CloudPanel cloud={cloud} data={data} />} />
           )}
         </main>
         <footer className="workspace-footer">
           <span>Memory</span>
           <span>
-            Local storage · {data.cards.filter((c) => !c.archived).length} cards
+            {data.cards.filter((c) => !c.archived).length} cards
           </span>
         </footer>
       </div>
@@ -1591,11 +1606,13 @@ function More({
   commit,
   now,
   notify,
+  cloudPanel,
 }: {
   data: Data;
   commit: Commit;
   now: number;
   notify: (s: string) => void;
+  cloudPanel: ReactNode;
 }) {
   const days = sevenDays(data, new Date(now)),
     total = days.reduce((sum, d) => sum + d.count, 0),
@@ -1610,6 +1627,7 @@ function More({
           <h1>More</h1>
         </div>
       </div>
+      {cloudPanel}
       <div className="more-grid">
         <section className="panel activity">
           <div className="section-heading">
@@ -1694,7 +1712,7 @@ function More({
         <section className="panel backup">
           <h2>Data</h2>
           <p className="muted">
-            Cards and progress are saved in this browser. Devices do not sync.
+            Keep a portable backup of your cards and progress. Cloud saving status is shown above.
           </p>
           <div className="button-row">
             <button

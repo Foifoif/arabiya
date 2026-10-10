@@ -4,3 +4,4 @@ node_modules
 .wrangler/
 test-results/
 playwright-report/
+docs/cloudflare-activation.jpg
