@@ -695,7 +695,7 @@ function Home({
                               {result === "wrong"
                                 ? "Wrong"
                                 : result === "almost"
-                                  ? "Almost There"
+                                  ? "Hard"
                                   : "Correct"}
                             </span>
                             <small>
@@ -838,7 +838,7 @@ function Home({
                         : round.results[card.id] === "correct"
                           ? "Correct"
                           : round.results[card.id] === "almost"
-                            ? "Almost There"
+                            ? "Hard"
                             : "Wrong"}
                     </span>
                     <small>
@@ -1176,13 +1176,38 @@ function CardEditor({
 }) {
   const draft = useDraft(draftKey, initial),
     [value, setValue] = useState(translated ? initial : draft.value),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [translating, setTranslating] = useState(false),
+    [suggestion, setSuggestion] = useState(translated);
+  const translationRequest = useRef<AbortController | null>(null);
+  useEffect(() => () => translationRequest.current?.abort(), []);
   function update(next: CardContent) {
+    translationRequest.current?.abort();
+    setTranslating(false);
     setValue(next);
     draft.update(next);
   }
+  async function translateHeadline(source: "front" | "back") {
+    translationRequest.current?.abort();
+    const controller = new AbortController();
+    translationRequest.current = controller;
+    setTranslating(true);
+    setError("");
+    try {
+      const result = await translate(value[source].headline, "en", controller.signal);
+      if (controller.signal.aborted) return;
+      const target = source === "front" ? "back" : "front";
+      update({ ...value, [target]: { ...value[target], headline: result } });
+      setSuggestion(true);
+    } catch (e) {
+      if (!controller.signal.aborted) setError(message(e));
+    } finally {
+      if (translationRequest.current === controller) setTranslating(false);
+    }
+  }
   function submit(e: FormEvent) {
     e.preventDefault();
+    translationRequest.current?.abort();
     if (!value.front.headline.trim() || !value.back.headline.trim()) {
       setError("Enter a headline on both sides.");
       return;
@@ -1192,7 +1217,7 @@ function CardEditor({
   }
   return (
     <form className="card-editor" onSubmit={submit}>
-      {translated && (
+      {suggestion && (
         <p className="translation-note">
           MyMemory suggestion. Edit either side before saving.
         </p>
@@ -1235,6 +1260,24 @@ function CardEditor({
                 }
               />
             </Field>
+            {value[side].designation === "Explanation" &&
+              value[side === "front" ? "back" : "front"].designation === "Arabic word" && (
+                <div>
+                  <button
+                    type="button"
+                    className="button secondary"
+                    disabled={translating || !value[side].headline.trim()}
+                    onClick={() => translateHeadline(side)}
+                  >
+                    <Languages size={16} />
+                    {translating ? "Translating…" : "Translate to Arabic"}
+                  </button>
+                  <p className="helper">
+                    Sends this English headline to MyMemory and fills the Arabic
+                    headline. You can edit the result before saving.
+                  </p>
+                </div>
+              )}
             <Field
               label={`${side === "front" ? "Front" : "Back"} description (optional)`}
             >
