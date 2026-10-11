@@ -32,7 +32,7 @@ The latest 50 cloud saves are retained in Supabase. Restoring one creates a new 
 - The Pages variables in `wrangler.toml` contain the Supabase URL, **publishable** key, and allowed email. Never substitute a secret or service-role key. No privileged database key is used by the app. The server validates each session with Supabase Auth and sends the user's token to the database.
 - Run `npm test` (including PostgreSQL schema/permission tests), `npm run build`, and the Playwright suite against a stable build preview. Browser cloud tests mock the network; separately verify real sign-in, ownership denial, migration, and a second browser before considering setup complete.
 
-Deployment and real-account verification are still pending. See `docs/cloud-save-plan.md` for the current completion gates.
+Cloud saving was deployed to alisarabic.com on 2026-10-10. Real-account sign-in, first migration, save/reload, version recovery, and synchronization between isolated browser stores have been verified. A live concurrent-edit test produced the expected conflict instead of overwriting data. Offline recovery is covered by simulated network failures in browser tests. See `docs/cloud-save-plan.md` for the verification record.
 
 The previous application remains in Git history at `0c36ad9a527908eed1f07950c4aeac447f16f6ba`, and its root `index.html` is retained outside the published directory. The previous production deployment is `b9113b42-aad6-42d9-a578-0d1cc7809461` (https://b9113b42.arabiya.pages.dev). Cloudflare's deployment rollback can restore it. Reverting the Memory deployment commit also restores the prior publishing directory.
 
