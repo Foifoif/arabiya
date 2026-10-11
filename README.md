@@ -39,3 +39,9 @@ The previous application remains in Git history at `0c36ad9a527908eed1f07950c4ae
 The existing `functions/api/` endpoints and `arabiya-db` D1 database are unchanged. The new `/cloud/` API uses the separate Supabase project. Memory does not call the legacy API or import its lesson data.
 
 Translation uses MyMemory only on explicit Translate actions; returned text is editable and should be reviewed before saving.
+
+### Suggested labels after translation
+
+Translation shows editable English-based category and part-of-speech hints in the card editor, search-to-card flow, and Tools translator. Apply a suggestion explicitly; translation never overwrites existing metadata. Compromise runs locally and loads on demand. Unrecognized single words abstain; ambiguous noun/verb readings offer alternatives. Common grammar-topic names suggest Grammar with no word type; other multiword text offers Phrase as a starting point. These hints do not verify the Arabic translation or its grammatical role.
+
+Future improvements: Arabic morphology and context-aware classification, broader grammar-topic recognition, and teacher-reviewed examples for ambiguous words. Keep manual approval and editing as these expand.

@@ -291,3 +291,63 @@ test("card editor translates English, preserves edits on failure, and saves over
   expect(saved.front.description).toBe("My note");
   expect(saved.back.headline).toBe("house");
 });
+
+test("suggested labels require applying, remain editable, and survive saving", async ({ page }, info) => {
+  await page.route("https://api.mymemory.translated.net/**", route => route.fulfill({
+    json: { responseStatus: 200, responseData: { translatedText: "جَمِيل" } },
+  }));
+  await page.goto("/");
+  await nav(page, "Cards");
+  await page.getByRole("button", { name: "Add Card", exact: true }).click();
+  await page.getByLabel("Back headline", { exact: true }).fill("beautiful");
+  await page.getByLabel("Category (optional)", { exact: true }).selectOption("Grammar");
+  await page.getByLabel("Part of speech (optional)", { exact: true }).selectOption("Pronoun");
+  await page.getByRole("button", { name: "Translate to Arabic", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Apply Vocab · Adjective", exact: true })).toBeVisible();
+  await expect(page.getByLabel("Category (optional)", { exact: true })).toHaveValue("Grammar");
+  await expect(page.getByLabel("Part of speech (optional)", { exact: true })).toHaveValue("Pronoun");
+  await page.getByRole("button", { name: "Apply Vocab · Adjective", exact: true }).click();
+  await expect(page.getByLabel("Part of speech (optional)", { exact: true })).toHaveValue("Adjective");
+  await page.screenshot({ path: `test-results/labels-${info.project.name}.png`, fullPage: true });
+  await overflow(page);
+  await page.getByLabel("Back headline", { exact: true }).fill("asdfgh");
+  await expect(page.getByLabel("Suggested labels")).toContainText("No confident suggestion");
+  await expect(page.getByRole("button", { name: "Apply Vocab · Adjective", exact: true })).toHaveCount(0);
+  await page.getByLabel("Back headline", { exact: true }).fill("beautiful");
+  await page.getByLabel("Part of speech (optional)", { exact: true }).selectOption("Phrase");
+  await page.getByRole("button", { name: "Save card", exact: true }).click();
+  await page.reload();
+  expect((await data(page)).cards.at(-1).partOfSpeech).toBe("Phrase");
+});
+
+test("Arabic to English tools suggestions carry into the editable card", async ({ page }) => {
+  await page.route("https://api.mymemory.translated.net/**", route => route.fulfill({
+    json: { responseStatus: 200, responseData: { translatedText: "teacher" } },
+  }));
+  await page.goto("/");
+  await nav(page, "Tools");
+  await page.getByLabel("Translation direction").selectOption("ar");
+  await page.getByLabel("Arabic text", { exact: true }).fill("معلم");
+  await page.getByRole("button", { name: "Translate", exact: true }).click();
+  await expect(page.getByLabel("Suggested labels")).toContainText("Vocab · Noun");
+  await page.getByLabel("Translation (editable)").fill("beautiful");
+  await expect(page.getByLabel("Suggested labels")).toContainText("Vocab · Adjective");
+  await page.getByRole("button", { name: "Use in a card" }).click();
+  await page.getByRole("button", { name: "Apply Vocab · Adjective", exact: true }).click();
+  await expect(page.getByLabel("Part of speech (optional)", { exact: true })).toHaveValue("Adjective");
+});
+
+test("translation remains usable when label suggestions cannot load", async ({ page }) => {
+  await page.route("**/label-suggestions-*.js", route => route.abort());
+  await page.route("https://api.mymemory.translated.net/**", route => route.fulfill({
+    json: { responseStatus: 200, responseData: { translatedText: "معلم" } },
+  }));
+  await page.goto("/");
+  await nav(page, "Cards");
+  await page.getByLabel("Search cards").fill("teacher");
+  await page.getByRole("button", { name: "Translate to new card" }).click();
+  await expect(page.getByLabel("Suggested labels")).toContainText("Suggestions unavailable");
+  await expect(page.getByLabel("Front headline", { exact: true })).toHaveValue("معلم");
+  await page.getByRole("button", { name: "Save card", exact: true }).click();
+  expect((await data(page)).cards.at(-1).back.headline).toBe("teacher");
+});

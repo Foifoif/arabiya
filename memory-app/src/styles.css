@@ -1983,3 +1983,6 @@ dialog::backdrop {
 .cloud-banner { margin-bottom: 20px; }
 .cloud-panel details { margin-top: 24px; }
 .cloud-panel summary { cursor: pointer; }
+
+.label-suggestions { border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin: 16px 0; }
+.label-options { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
