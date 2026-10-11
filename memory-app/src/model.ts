@@ -105,8 +105,8 @@ export const blankContent = (): CardContent => ({
   front: { headline: "", description: "", designation: "Arabic word" },
   back: { headline: "", description: "", designation: "Explanation" },
   topic: "Arabic",
-  category: "",
-  partOfSpeech: "",
+  category: "Vocab",
+  partOfSpeech: "Noun",
 });
 export const contentOf = (card: Card): CardContent => contentSchema.parse(card);
 export function initialData(now = Date.now()): Data {
