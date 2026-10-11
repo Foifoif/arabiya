@@ -20,6 +20,7 @@
     "@fontsource/dm-sans": "^5.3.0",
     "@fontsource/noto-naskh-arabic": "^5.3.0",
     "@supabase/supabase-js": "^2.117.3",
+    "compromise": "^14.18.0",
     "lucide-react": "^1.52.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

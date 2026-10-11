@@ -1,3 +1,4 @@
+import { LabelSuggestions } from "./LabelSuggestions";
 import {
   useState,
   useRef,
@@ -1311,6 +1312,13 @@ function CardEditor({
           </section>
         ))}
       </div>
+      {suggestion && value.front.designation !== value.back.designation &&
+        (value.front.designation === "Explanation" || value.back.designation === "Explanation") && (
+          <LabelSuggestions
+            english={value.front.designation === "Explanation" ? value.front.headline : value.back.headline}
+            onApply={(category, partOfSpeech) => update({ ...value, category, partOfSpeech })}
+          />
+        )}
       <div className="metadata-fields">
         <Field label="Topic">
           <input
@@ -1471,6 +1479,7 @@ function Tools({
             />
           </Field>
         </div>
+        {output.trim() && <LabelSuggestions english={from === "en" ? input : output} />}
         <div className="translator-actions">
           <button
             className="button primary"
