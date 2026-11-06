@@ -1,3 +1,4 @@
+import { EmailSignIn } from "./EmailSignIn";
 import { useEffect, useRef, useState } from "react";
 import type { Data } from "./model";
 import { CLOUD_ENABLED, RECOVERY_KEY, CloudSync, cloudRequest, type CloudState, type Version } from "./cloud-sync";
@@ -67,7 +68,10 @@ export function CloudPanel({ cloud, data }: { cloud: ReturnType<typeof useCloudS
     <p role="status">{statusLabel[state.status]}</p>
     {state.email && <p className="muted">{state.email}</p>}
     <p className="helper">Saved cards, review history, preferences and links sync between signed-in devices. Unfinished card drafts stay on this device.</p>
-    {!state.email && <form className="cloud-login" onSubmit={event => {
+    {!state.email && <EmailSignIn onSignedIn={() => {
+      localStorage.setItem(CLOUD_ENABLED, "yes"); retry();
+    }} />}
+    {!state.email && <details><summary>Sign in with a password instead</summary><form className="cloud-login" onSubmit={event => {
       event.preventDefault();
       void action(async () => {
         const client = await getCloudClient();
@@ -82,7 +86,7 @@ export function CloudPanel({ cloud, data }: { cloud: ReturnType<typeof useCloudS
       <label>Password<input type="password" autoComplete="current-password" required value={password} onChange={event => setPassword(event.target.value)} /></label>
       <button className="button primary" disabled={working}>Sign in</button>
       <p className="helper">Private access for your existing account. Signing in does not replace your cards; you’ll choose which collection to use first.</p>
-    </form>}
+    </form></details>}
     <div className="button-row">
       {state.status !== "local" && <button className="button secondary" onClick={retry} disabled={working}>Sync now</button>}
       {state.email && <button className="button secondary" disabled={working || state.status === "syncing" || state.status === "checking"} onClick={() => action(async () => {

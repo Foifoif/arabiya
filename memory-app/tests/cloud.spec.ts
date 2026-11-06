@@ -39,7 +39,8 @@ function server() {
 }
 async function login(page: Page) {
   await nav(page, "More");
-  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByText("Sign in with a password instead", { exact: true }).click();
+  await page.locator("details").filter({ hasText: "Sign in with a password instead" }).getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill("test-only-password");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
 }
@@ -111,7 +112,7 @@ test("sign-in, explicit migration, two devices, offline conflict and version rec
     await page.getByRole("button", { name: "Sign out", exact: true }).click();
     await expect(page.getByText("Saved on this device", { exact: true }).first()).toBeVisible();
     await nav(page, "More");
-    await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Send sign-in code", exact: true })).toBeVisible();
     expect((await read(page)).cards).toHaveLength(6);
   } finally { await otherContext.close(); }
 });
@@ -127,4 +128,35 @@ test("failed sign-in preserves cards and provides a retryable form", async ({ pa
   await expect(page.getByRole("alert")).toContainText("Could not sign in");
   expect((await read(page)).cards).toEqual(original.cards);
   expect(remote.head().version).toBe(0);
+});
+
+test("email codes verify before connecting existing cards and recover from expired codes", async ({page, context}) => {
+  const remote = server();
+  await remote.connect(context);
+  let reject = true;
+  await context.route("https://test-project.supabase.co/auth/v1/otp", async route => {
+    expect(route.request().postDataJSON()).toMatchObject({ email, create_user: false });
+    await route.fulfill({json:{}});
+  });
+  await context.route("https://test-project.supabase.co/auth/v1/verify", async route => {
+    expect(route.request().postDataJSON()).toMatchObject({email, type:"email", token:"123456"});
+    if (reject) return route.fulfill({status:403,json:{message:"Token expired",code:"otp_expired"}});
+    await route.fulfill({json:{access_token:jwt, refresh_token:"test-refresh-token", expires_in:3600, token_type:"bearer",user:{id:owner,aud:"authenticated",email,email_confirmed_at:new Date().toISOString()}}});
+  });
+  await page.goto("/");
+  const original = await read(page);
+  await nav(page,"More");
+  await page.getByLabel("Email",{exact:true}).filter({visible:true}).fill(email);
+  await page.getByRole("button",{name:"Send sign-in code",exact:true}).click();
+  await expect(page.getByLabel("Sign-in code",{exact:true})).toBeVisible();
+  expect(remote.head().version).toBe(0);
+  await page.getByLabel("Sign-in code",{exact:true}).fill("123456");
+  await page.getByRole("button",{name:"Verify and sign in",exact:true}).click();
+  await expect(page.getByRole("alert")).toContainText("invalid or expired");
+  expect((await read(page)).cards).toEqual(original.cards);
+  reject=false;
+  await page.getByRole("button",{name:"Verify and sign in",exact:true}).click();
+  await expect(page.getByRole("heading",{name:"Connect your collection"})).toBeVisible();
+  expect(remote.head().version).toBe(0);
+  expect((await read(page)).cards).toEqual(original.cards);
 });
