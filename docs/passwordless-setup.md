@@ -1,14 +1,11 @@
-# Passwordless email rollout (prepared; not enabled in production)
+# Email-only rollout — awaiting database setup
 
-The app requests an email OTP with `shouldCreateUser: false`, verifies it with Supabase, then follows the existing explicit collection connection flow. Existing account UUID, cards, row security, and sessions stay intact. Password login remains available during rollout.
+Owner explicitly requested access by email alone, accepting that others can view, edit and delete cards. No SMTP provider is needed. The email is a collection selector, not authentication.
 
-Required operator setup:
+App changes are prepared on `codex/passwordless-email` (PR 7). Existing account UUID, cards and history are preserved. Existing password sessions still work.
 
-1. Connect a transactional email provider to the existing Supabase project `bdcpqmlibrsrfnjzbugq` under Authentication → Email / SMTP settings. Verify a sender domain through its DNS provider. Enter the SMTP credential directly in Supabase; never commit or paste it into chat.
-2. In Authentication → Email Templates → Magic Link, use a code template containing `{{ .Token }}`. Example subject: `Your Arabic practice sign-in code`; body: `<h2>Sign in to Arabic practice</h2><p>Your sign-in code is: <strong>{{ .Token }}</strong></p><p>If you did not request this code, ignore this email.</p>`. This code flow needs no redirect callback.
-3. Keep public signup disabled and retain existing account and private database policies. Configure an appropriate OTP expiry (e.g. 10 minutes) and resend limits in Supabase; the UI also avoids immediate repeated requests.
-4. Deploy this branch after delivery configuration, request a code for the existing account, and have the user enter it. Verify the existing cloud cards load and changes sync across two devices. Check expired/used codes and delivery failure. Do not delete/recreate the account.
+Before merging/deploying: in the existing Supabase project SQL Editor run `supabase/migrations/20261105_email_only.sql`. It grants anonymous callers access to the four collection RPCs and resolves the original owner only when the request supplies the approved email header. The private tables remain inaccessible directly. Knowing the email suffices to access this collection, including through the public Supabase API.
 
-No SMTP changes or production email delivery have been verified yet. No production deployment should be described as complete until the real inbox sign-in is tested.
+Then deploy and verify connecting by email, loading the current cloud collection, saving and syncing across devices. Never recreate the account or overwrite its collection with an empty device collection. The existing collection-choice and version-recovery controls remain in place.
 
-References: https://supabase.com/docs/guides/auth/auth-email-passwordless and https://supabase.com/docs/guides/auth/auth-smtp
+No production database changes have been applied from this session. No provider costs are introduced.

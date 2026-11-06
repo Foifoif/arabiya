@@ -15,10 +15,11 @@ export class CloudError extends Error {
 export async function cloudRequest(path: string, init?: RequestInit) {
   let response: Response;
   try {
-    const token = await accessToken();
-    if (!token) throw new CloudError("Sign in to cloud saving.", 401);
+    const email = localStorage.getItem("memory:collection-email");
+    const token = email ? null : await accessToken();
+    if (!token && !email) throw new CloudError("Sign in to cloud saving.", 401);
     response = await fetch(`/cloud/api/${path}`, { ...init, credentials: "same-origin", redirect: "error",
-      headers: { "Content-Type": "application/json", ...init?.headers, Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(20000) });
+      headers: { "Content-Type": "application/json", ...init?.headers, ...(email ? { "X-Memory-Email": email } : { Authorization: `Bearer ${token}` }) }, signal: AbortSignal.timeout(20000) });
   } catch (error) {
     if (error instanceof CloudError) throw error;
     throw new CloudError(navigator.onLine ? "Cloud could not be reached. Sign in again if your session expired." : "Offline. Your changes are saved on this device.", 0);

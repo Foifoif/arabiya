@@ -76,3 +76,18 @@ test("Postgres validates direct API writes and supports rerunning the migration"
   await db.exec("set role authenticated;");
   expect((await rpc("memory_state")).version).toBe(1);
 });
+
+test("email-only migration preserves cards and history under the existing owner", async () => {
+  const original = await save(0);
+  await db.exec("reset role;");
+  await db.exec(readFileSync(new URL("../../supabase/migrations/20261105_email_only.sql", import.meta.url), "utf8"));
+  await db.exec("set role anon; set request.jwt.claim.sub = ''; set request.headers = '{}';");
+  await expect(rpc("memory_state")).rejects.toMatchObject({code:"42501"});
+  await db.exec(`set request.headers = '{"x-memory-email":"wrong@example.com"}';`);
+  await expect(rpc("memory_state")).rejects.toMatchObject({code:"42501"});
+  await db.exec(`set request.headers = '{"x-memory-email":"aliafsh.3@gmail.com"}';`);
+  expect(await rpc("memory_state")).toEqual(original);
+  await save(1);
+  expect(await rpc("memory_versions")).toHaveLength(2);
+  await expect(db.query("select * from memory_private.collections")).rejects.toMatchObject({code:"42501"});
+});

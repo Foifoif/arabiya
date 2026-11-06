@@ -90,6 +90,7 @@ export function CloudPanel({ cloud, data }: { cloud: ReturnType<typeof useCloudS
     <div className="button-row">
       {state.status !== "local" && <button className="button secondary" onClick={retry} disabled={working}>Sync now</button>}
       {state.email && <button className="button secondary" disabled={working || state.status === "syncing" || state.status === "checking"} onClick={() => action(async () => {
+        localStorage.removeItem("memory:collection-email");
         const client = await getCloudClient();
         const result = await client.auth.signOut({ scope: "local" });
         if (result.error) throw result.error;

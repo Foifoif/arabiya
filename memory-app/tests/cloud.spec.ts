@@ -19,7 +19,7 @@ function server() {
     });
     await context.route("**/cloud/api/**", async route => {
       if (connection.offline) return route.abort("internetdisconnected");
-      if (route.request().headers().authorization !== `Bearer ${jwt}`) return route.fulfill({ status: 401, json: { error: "Sign in" } });
+      if (route.request().headers().authorization !== `Bearer ${jwt}` && route.request().headers()["x-memory-email"] !== email) return route.fulfill({ status: 401, json: { error: "Sign in" } });
       const path = new URL(route.request().url()).pathname.replace("/cloud/api/", "");
       if (path === "state" && route.request().method() === "PUT") {
         const body = route.request().postDataJSON();
@@ -112,7 +112,7 @@ test("sign-in, explicit migration, two devices, offline conflict and version rec
     await page.getByRole("button", { name: "Sign out", exact: true }).click();
     await expect(page.getByText("Saved on this device", { exact: true }).first()).toBeVisible();
     await nav(page, "More");
-    await expect(page.getByRole("button", { name: "Send sign-in code", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Connect collection", exact: true })).toBeVisible();
     expect((await read(page)).cards).toHaveLength(6);
   } finally { await otherContext.close(); }
 });
@@ -130,33 +130,13 @@ test("failed sign-in preserves cards and provides a retryable form", async ({ pa
   expect(remote.head().version).toBe(0);
 });
 
-test("email codes verify before connecting existing cards and recover from expired codes", async ({page, context}) => {
-  const remote = server();
-  await remote.connect(context);
-  let reject = true;
-  await context.route("https://test-project.supabase.co/auth/v1/otp", async route => {
-    expect(route.request().postDataJSON()).toMatchObject({ email, create_user: false });
-    await route.fulfill({json:{}});
-  });
-  await context.route("https://test-project.supabase.co/auth/v1/verify", async route => {
-    expect(route.request().postDataJSON()).toMatchObject({email, type:"email", token:"123456"});
-    if (reject) return route.fulfill({status:403,json:{message:"Token expired",code:"otp_expired"}});
-    await route.fulfill({json:{access_token:jwt, refresh_token:"test-refresh-token", expires_in:3600, token_type:"bearer",user:{id:owner,aud:"authenticated",email,email_confirmed_at:new Date().toISOString()}}});
-  });
-  await page.goto("/");
-  const original = await read(page);
-  await nav(page,"More");
+test("email connects to cloud without password or verification", async ({page,context}) => {
+  const remote=server(); await remote.connect(context);
+  await page.goto("/"); await nav(page,"More");
   await page.getByLabel("Email",{exact:true}).filter({visible:true}).fill(email);
-  await page.getByRole("button",{name:"Send sign-in code",exact:true}).click();
-  await expect(page.getByLabel("Sign-in code",{exact:true})).toBeVisible();
-  expect(remote.head().version).toBe(0);
-  await page.getByLabel("Sign-in code",{exact:true}).fill("123456");
-  await page.getByRole("button",{name:"Verify and sign in",exact:true}).click();
-  await expect(page.getByRole("alert")).toContainText("invalid or expired");
-  expect((await read(page)).cards).toEqual(original.cards);
-  reject=false;
-  await page.getByRole("button",{name:"Verify and sign in",exact:true}).click();
+  await page.getByRole("button",{name:"Connect collection",exact:true}).click();
   await expect(page.getByRole("heading",{name:"Connect your collection"})).toBeVisible();
   expect(remote.head().version).toBe(0);
-  expect((await read(page)).cards).toEqual(original.cards);
+  await page.getByRole("button",{name:"Use this device’s collection"}).click();
+  await saved(page);
 });
