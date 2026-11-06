@@ -19,7 +19,7 @@ function server() {
     });
     await context.route("**/cloud/api/**", async route => {
       if (connection.offline) return route.abort("internetdisconnected");
-      if (route.request().headers().authorization !== `Bearer ${jwt}`) return route.fulfill({ status: 401, json: { error: "Sign in" } });
+      if (route.request().headers().authorization !== `Bearer ${jwt}` && route.request().headers()["x-memory-email"] !== email) return route.fulfill({ status: 401, json: { error: "Sign in" } });
       const path = new URL(route.request().url()).pathname.replace("/cloud/api/", "");
       if (path === "state" && route.request().method() === "PUT") {
         const body = route.request().postDataJSON();
@@ -39,7 +39,8 @@ function server() {
 }
 async function login(page: Page) {
   await nav(page, "More");
-  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByText("Sign in with a password instead", { exact: true }).click();
+  await page.locator("details").filter({ hasText: "Sign in with a password instead" }).getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill("test-only-password");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
 }
@@ -111,7 +112,7 @@ test("sign-in, explicit migration, two devices, offline conflict and version rec
     await page.getByRole("button", { name: "Sign out", exact: true }).click();
     await expect(page.getByText("Saved on this device", { exact: true }).first()).toBeVisible();
     await nav(page, "More");
-    await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Connect collection", exact: true })).toBeVisible();
     expect((await read(page)).cards).toHaveLength(6);
   } finally { await otherContext.close(); }
 });
@@ -127,4 +128,15 @@ test("failed sign-in preserves cards and provides a retryable form", async ({ pa
   await expect(page.getByRole("alert")).toContainText("Could not sign in");
   expect((await read(page)).cards).toEqual(original.cards);
   expect(remote.head().version).toBe(0);
+});
+
+test("email connects to cloud without password or verification", async ({page,context}) => {
+  const remote=server(); await remote.connect(context);
+  await page.goto("/"); await nav(page,"More");
+  await page.getByLabel("Email",{exact:true}).filter({visible:true}).fill(email);
+  await page.getByRole("button",{name:"Connect collection",exact:true}).click();
+  await expect(page.getByRole("heading",{name:"Connect your collection"})).toBeVisible();
+  expect(remote.head().version).toBe(0);
+  await page.getByRole("button",{name:"Use this device’s collection"}).click();
+  await saved(page);
 });

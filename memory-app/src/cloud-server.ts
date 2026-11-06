@@ -15,6 +15,16 @@ function configuration(env: Env) {
 }
 export async function authenticate(request: Request, env: Env) {
   const config = configuration(env);
+  const requestedEmail = request.headers.get("X-Memory-Email")?.trim().toLowerCase();
+  if (requestedEmail) {
+    if (requestedEmail !== env.MEMORY_EMAIL!.trim().toLowerCase()) throw new HttpError(403, "No collection is available for this email.");
+    const client = createClient(config.url, config.publishableKey, {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+      global: { headers: { "X-Memory-Email": requestedEmail },
+        fetch: (input, init) => fetch(input, { ...init, signal: AbortSignal.timeout(10000) }) },
+    });
+    return { client, email: requestedEmail };
+  }
   const authorization = request.headers.get("Authorization") || "";
   if (!/^Bearer [^\s]{1,16000}$/.test(authorization)) throw new HttpError(401, "Sign in to access your collection.");
   const token = authorization.slice(7);
